@@ -1,0 +1,119 @@
+﻿<UserControl x:Class="WireRodClassifer_1._0.View.ConfigDispAquiView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:WireRodClassifer_1._0.View"
+             mc:Ignorable="d" 
+             d:DesignHeight="400" d:DesignWidth="500"
+             Margin="0,0,10,0"
+             Name="ConfiDispAquiView"
+             Loaded="ConfiDispAquiView_Loaded">
+
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <GroupBox Header="Interfaces de Aquisição" Grid.Row="0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="50*"/>
+                    <ColumnDefinition Width="50*"/>
+                </Grid.ColumnDefinitions>
+                <Button Name="btnAutoDetect" Grid.Column="0" Margin="10" Click="BtnAutoDetect_Click">Auto-Detectar Interfaces</Button>
+                <ComboBox Name="cbboxInterfaces" Grid.Column="1" Margin="10"
+                          ItemsSource="{Binding Path=HInterfacesDLLName}"
+                          SelectionChanged="CbboxInterfaces_SelectionChanged"
+                          />
+            </Grid>
+        </GroupBox>
+        <GroupBox Header="Conexão" Grid.Row="1" Name="gpBoxConexao">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="122"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!--1st Row-->
+                <Label Grid.Row="0" Grid.Column="0" Margin="5" HorizontalAlignment="Left">Device</Label>
+                <ComboBox Name="cbboxDevice" Grid.Row="0" Grid.Column="1" Margin="5" HorizontalAlignment="Left"
+                          ItemsSource="{Binding Path=Device}"/>
+                <Label Grid.Row="0" Grid.Column="2" Margin="5" HorizontalAlignment="Left">Port</Label>
+                <ComboBox Name="cbboxPort" Grid.Row="0" Grid.Column="3" Margin="5" HorizontalAlignment="Left"
+                          ItemsSource="{Binding Path=Port}"/>
+
+                <!--2nd Row-->
+                <Label Grid.Row="1" Grid.Column="0" Margin="5" HorizontalAlignment="Left">Camera Type</Label>
+                <ComboBox Name="cbboxCamType" Grid.Row="1" Grid.Column="1" Margin="5" Grid.ColumnSpan="3" HorizontalAlignment="Left"
+                          ItemsSource="{Binding Path=CameraType}"/>
+
+                <!--3rd Row-->
+                <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Column="0" Margin="5" HorizontalAlignment="Left">Resolution</Label>
+                    <Label Grid.Column="1" Margin="5" HorizontalAlignment="Left">X</Label>
+                    <ComboBox Name="cbboxX" Grid.Column="2" Margin="5" HorizontalAlignment="Left"
+                              ItemsSource="{Binding Path=ResolutionX}"
+                              />
+                    <Label Grid.Column="3" Margin="5" HorizontalAlignment="Left">Y</Label>
+                    <ComboBox Name="cbboxY" Grid.Column="4" Margin="5" HorizontalAlignment="Left"
+                              ItemsSource="{Binding Path=ResolutionY}"
+                              />
+                </Grid>
+                <Label Grid.Row="2" Grid.Column="2" Margin="5" HorizontalAlignment="Left">Color Space</Label>
+                <ComboBox Name="cbboxColorSpace" Grid.Row="2" Grid.Column="3" Margin="5" HorizontalAlignment="Left"
+                          ItemsSource="{Binding Path=ColorSpace}"
+                          />
+
+                <!--4th Row-->
+                <Label Grid.Row="3" Grid.Column="0" Margin="5" HorizontalAlignment="Left">Field</Label>
+                <ComboBox Name="cbboxField" Grid.Row="3" Grid.Column="1" Margin="5" HorizontalAlignment="Left"
+                          ItemsSource="{Binding Path=Field}"
+                          />
+                <Label Grid.Row="3" Grid.Column="2" Margin="5" HorizontalAlignment="Left">Bit Depth</Label>
+                <ComboBox Name="cbboxBitDepth" Grid.Row="3" Grid.Column="3" Margin="5" HorizontalAlignment="Left"
+                          ItemsSource="{Binding Path=BitDepth}"
+                          />
+
+                <!--5th Row-->
+                <Label Grid.Row="4" Grid.Column="0" Margin="5" HorizontalAlignment="Left">Generic</Label>
+                <ComboBox Name="cbboxGeneric" Grid.Row="4" Grid.Column="1" Margin="5" Grid.ColumnSpan="3" HorizontalAlignment="Left"
+                          ItemsSource="{Binding Path=Generic}"
+                          />
+
+                <!--6th Row-->
+                <Separator Grid.Row="5" VerticalAlignment="Top" Grid.ColumnSpan="4" Background="LightGray"/>
+                <Label Grid.Row="6" Grid.Column="0" HorizontalAlignment="Left">Default</Label>
+                <CheckBox Name="chkboxDefault" Grid.Row="6" Grid.Column="1" Margin="0,5,101,5" HorizontalAlignment="Right"
+                          Click="ChkboxDefault_Click"/>
+
+                <!--7th Row-->
+                <Button Name="btnConectar" Grid.Row="7" Grid.Column="2" Margin="5"
+                        Click="BtnConectar_Click">Conectar</Button>
+                <Button Name="btnResetar" Grid.Row="7" Grid.Column="3" Margin="5"
+                        Click="BtnResetar_Click">Resetar</Button>
+            </Grid>
+        </GroupBox>
+    </Grid>
+</UserControl>

@@ -1,0 +1,46 @@
+﻿<Window x:Class="WireRodClassifer_1._0.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WireRodClassifer_1._0"
+        xmlns:Halcon="clr-namespace:HalconDotNet;assembly=halcondotnet"
+        mc:Ignorable="d"
+        Title="Wire Rod Classifier 1.0"
+        SizeToContent="WidthAndHeight"
+        WindowStartupLocation="CenterScreen">
+    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="169*"/>
+            <ColumnDefinition Width="411*"/>
+            <ColumnDefinition Width="580*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Menu Grid.Row="0" Grid.ColumnSpan="3">
+            <MenuItem Header="Início" Name="menuHeaderInicio" Click="MenuHeaderInicio_Click"/>
+            <MenuItem Header="Configurações">
+                <MenuItem Header="_Dispositivos de Aquisição" Name="menuItemDispAqui" Click="MenuItemDispAqui_Click"/>
+                <MenuItem Header="_Operadores"/>
+                <MenuItem Header="_ROI"/>
+            </MenuItem>
+            <MenuItem Header="Sobre"/>
+        </Menu>
+        <Grid Height="Auto" Width="Auto" Grid.Row="1" Grid.ColumnSpan="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Halcon:HWindowControlWPF Name="HalconWindow"  Grid.Column="0" Height="480" Width="640" Margin="10" HInitWindow="HalconWindow_HInitWindow"/>
+            <ContentControl Name="contentMain" Grid.Column="1" Height="400" Width="500">
+
+            </ContentControl>
+        </Grid>
+
+        <Label Grid.Row="2" Name="labelStatus" Background="LightGray" Grid.ColumnSpan="3" Content=" "></Label>
+    </Grid>
+</Window>
