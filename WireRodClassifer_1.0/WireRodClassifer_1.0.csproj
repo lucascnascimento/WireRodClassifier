@@ -63,7 +63,6 @@
     <Compile Include="Helper Classes\BroadcastEventArgs.cs" />
     <Compile Include="Helper Classes\ChangeLabelStatusEventArgs.cs" />
     <Compile Include="Helper Classes\ChangePageEventArgs.cs" />
-    <Compile Include="Helper Classes\ClassificacaoFioMaquina2 %281%29.cs" />
     <Compile Include="Helper Classes\ConcreteMediator.cs" />
     <Compile Include="Helper Classes\IMediator.cs" />
     <Compile Include="Helper Classes\IParticipant.cs" />
