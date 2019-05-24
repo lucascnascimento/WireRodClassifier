@@ -94,6 +94,7 @@ namespace WireRodClassifer_1._0.View
             }
         }
 
+
         public void AddMediator(IMediator mediator)
         {
             this.mediator = mediator;

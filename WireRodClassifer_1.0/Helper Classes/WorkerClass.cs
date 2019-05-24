@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using WireRodClassifer_1._0.Model;
 
 namespace WireRodClassifer_1._0.Helper_Classes
@@ -16,6 +17,7 @@ namespace WireRodClassifer_1._0.Helper_Classes
         HTuple window;
         CancellationToken token;
         IMediator mediator;
+        private HDevelopExport HDevExp;
 
         #endregion
 
@@ -23,7 +25,7 @@ namespace WireRodClassifer_1._0.Helper_Classes
 
         public WorkerClass()
         {
-
+            HDevExp = new HDevelopExport();
         }
 
         #endregion
@@ -34,7 +36,18 @@ namespace WireRodClassifer_1._0.Helper_Classes
         {
             this.token = token;
             this.window = window;
-            executeCapturingAndProcessing(currentDevice);
+            //executeCapturingAndProcessing(currentDevice);
+            HTuple hv_AcqHandle = null;
+            hv_AcqHandle = setOpenFrameGrabber(currentDevice);
+            if (hv_AcqHandle != null)
+            {
+                HDevExp.RunHalcon(window, hv_AcqHandle, token);
+            }
+            else
+            {
+                Thread.CurrentThread.Abort();
+            }
+            //!Pode ocorrer da thread não fechar quando a captura não for bem sucedida
         }
 
         private void executeCapturingAndProcessing(ConfigAcquisitionDevice currentDevice)
@@ -81,10 +94,11 @@ namespace WireRodClassifer_1._0.Helper_Classes
                                 currentDevice.Defaults[9], currentDevice.Defaults[10], currentDevice.Defaults[11], currentDevice.Defaults[12], currentDevice.Defaults[13], currentDevice.Defaults[14], out hv_AcqHandle);
                     return hv_AcqHandle;
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
 
-                    throw;
+                    MessageBox.Show("Não foi possível iniciar configurar a captura de imagem. Erro: " + e.Message, "Erro!", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return hv_AcqHandle = null;
                 }
             }
             else
@@ -96,10 +110,10 @@ namespace WireRodClassifer_1._0.Helper_Classes
                                 currentDevice.Generic, currentDevice.External_trigger, currentDevice.Camera_type, currentDevice.Device, currentDevice.Port, currentDevice.Line_in, out hv_AcqHandle);
                     return hv_AcqHandle;
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-
-                    throw;
+                    MessageBox.Show("Não foi possível iniciar configurar a captura de imagem. Erro: " + e.Message, "Erro!", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return hv_AcqHandle = null;
                 }
             }
         }
