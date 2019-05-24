@@ -42,6 +42,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -66,6 +67,7 @@
     <Compile Include="Helper Classes\ClassificacaoFioMaquina2 %282%29.cs" />
     <Compile Include="Helper Classes\Complex.cs" />
     <Compile Include="Helper Classes\ConcreteMediator.cs" />
+    <Compile Include="Helper Classes\FFT.cs" />
     <Compile Include="Helper Classes\IMediator.cs" />
     <Compile Include="Helper Classes\IParticipant.cs" />
     <Compile Include="Helper Classes\IsConfiguredEventArgs.cs" />

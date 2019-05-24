@@ -104,5 +104,8 @@
     <Setting Name="default14" Type="System.Int64" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
+    <Setting Name="FolderPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">NoFolder</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

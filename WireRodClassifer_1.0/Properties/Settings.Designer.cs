@@ -429,5 +429,17 @@ namespace WireRodClassifer_1._0.Properties {
                 this["default14"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("NoFolder")]
+        public string FolderPath {
+            get {
+                return ((string)(this["FolderPath"]));
+            }
+            set {
+                this["FolderPath"] = value;
+            }
+        }
     }
 }

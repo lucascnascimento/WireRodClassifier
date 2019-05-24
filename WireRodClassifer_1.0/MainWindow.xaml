@@ -27,6 +27,7 @@
                 <MenuItem Header="_Dispositivos de Aquisição" Name="menuItemDispAqui" Click="MenuItemDispAqui_Click"/>
                 <MenuItem Header="_Operadores"/>
                 <MenuItem Header="_ROI"/>
+                <MenuItem Header="_Salvar" Name="menuItemSalvar" Click="MenuItemSalvar_Click"/>
             </MenuItem>
             <MenuItem Header="Sobre"/>
         </Menu>

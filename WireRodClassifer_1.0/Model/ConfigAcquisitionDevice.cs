@@ -19,6 +19,7 @@ namespace WireRodClassifer_1._0.Model
         private bool _isDefault;
         public event EventHandler<IsConfiguredEventArgs> IsConfiguredEvent;
         private HTuple _window;
+        private string _folderPath;
 
 
         #endregion
@@ -82,6 +83,8 @@ namespace WireRodClassifer_1._0.Model
         }
 
         public HTuple Window { get => _window; set => _window = value; }
+
+        public string FolderPath { get => _folderPath; set => _folderPath = value; }
 
         #endregion
 

@@ -372,7 +372,6 @@ public partial class HDevelopExport
             if (ho_Roi_Dt_Bb != null)
                 ho_Roi_Dt_Bb.Dispose();
             HOperatorSet.ReduceDomain(ho_Image, ho_Roi_Dt, out ho_Roi_Dt_Bb);
-            //! Não entendi o HDevWindowStack
             if (HDevWindowStack.IsOpen())
             {
                 HOperatorSet.DispObj(ho_Roi_Dt_Bb, HDevWindowStack.GetActive());
@@ -409,7 +408,8 @@ public partial class HDevelopExport
                     //"C:\\Users\\NOTEBOOK\\Documents\\pesquisas\\gerdau\\FORMACAODEESPIRAS\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\";
                     //"C:\\Users\\Public\\Documents\\classificadorDeBobinas\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\";
                     arquivoNotasNome = arquivoNotasNome + "Notas" + "_" + data + "_" + horario + ".txt";
-                    arquivoNotas = File.CreateText(arquivoNotasNome);
+                    //!Retirar essa parte para testar no my computador - Ass: Lucas
+                    //arquivoNotas = File.CreateText(arquivoNotasNome);
                     hv_ImageNum = 0;
                     numeroDeNotas = 0;
                     //string arquivoNotasFiltradasNome = "C:\\Users\\Public\\Documents\\classificadorDeBobinas\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\";
@@ -1213,8 +1213,8 @@ public partial class HDevelopExport
                         
                         for (int n = 0; n < nPontosBordaDireita; n++)
                         {
-                            vetorBordaDireitaComplexo[n].real = vetorBordaDireita[n] - media;
-                            vetorBordaDireitaComplexo[n].imag = 0.0;
+                            vetorBordaDireitaComplexo[n].Real = vetorBordaDireita[n] - media;
+                            vetorBordaDireitaComplexo[n].Imag = 0.0;
                             //tempo = tempo + 0.001;
                             //y[n].real = 10.0 * Math.Cos(2.0 * Math.PI * 60.0 * tempo);
                             //y[n].imag = 0.0;
@@ -1229,8 +1229,8 @@ public partial class HDevelopExport
                         }
                         for (int n = 0; n < nPontosBordaEsquerda; n++)
                         {
-                            vetorBordaEsquerdaComplexo[n].real = vetorBordaEsquerda[n] - media2;
-                            vetorBordaEsquerdaComplexo[n].imag = 0.0;
+                            vetorBordaEsquerdaComplexo[n].Real = vetorBordaEsquerda[n] - media2;
+                            vetorBordaEsquerdaComplexo[n].Imag = 0.0;
                             //indexVetores2++;
                         }
 
@@ -1238,8 +1238,8 @@ public partial class HDevelopExport
                         // completa com zeros até o núm. de pontos do vetor ser uma pot. de 2 para borda direita
                         while (indexVetores < (nPontosBordaDireita + diferencaPotencia2))
                         {
-                            vetorBordaDireitaComplexo[indexVetores].real = 0.0;
-                            vetorBordaDireitaComplexo[indexVetores].imag = 0.0;
+                            vetorBordaDireitaComplexo[indexVetores].Real = 0.0;
+                            vetorBordaDireitaComplexo[indexVetores].Imag = 0.0;
                             //tempo = tempo + 0.001;
                             //y[indexVetores].real = 10.0 * Math.Cos(2.0 * Math.PI * 60.0 * tempo) + 5.0* Math.Cos(2.0*Math.PI*150.0*tempo);
                             //y[indexVetores].imag = 0.0;
@@ -1249,8 +1249,8 @@ public partial class HDevelopExport
                           // completa com zeros até o núm. de pontos do vetor ser uma pot. de 2 para borda esquerda
                         while (indexVetores2 < (nPontosBordaEsquerda + diferencaPotencia22))
                         {
-                            vetorBordaEsquerdaComplexo[indexVetores2].real = 0.0;
-                            vetorBordaEsquerdaComplexo[indexVetores2].imag = 0.0;
+                            vetorBordaEsquerdaComplexo[indexVetores2].Real = 0.0;
+                            vetorBordaEsquerdaComplexo[indexVetores2].Imag = 0.0;
                             indexVetores2++;
                         }
 
@@ -1279,14 +1279,14 @@ public partial class HDevelopExport
                         double constFFTBordaEsquerda = 2.0 / (nPontosBordaEsquerda + diferencaPotencia22);
                         for (int i = 0; i < fftVetorBordaEsquerda.Length; i++)
                         {
-                            fftVetorBordaEsquerda[i].real = fftVetorBordaEsquerda[i].real * constFFTBordaEsquerda;
-                            fftVetorBordaEsquerda[i].imag = fftVetorBordaEsquerda[i].imag * constFFTBordaEsquerda;
+                            fftVetorBordaEsquerda[i].Real = fftVetorBordaEsquerda[i].Real * constFFTBordaEsquerda;
+                            fftVetorBordaEsquerda[i].Imag = fftVetorBordaEsquerda[i].Imag * constFFTBordaEsquerda;
                         }
 
                         for (int i = 0; i < fftVetorBordaDireita.Length; i++)
                         {
-                            fftVetorBordaDireita[i].real = fftVetorBordaDireita[i].real * constFFTBordaDireita;
-                            fftVetorBordaDireita[i].imag = fftVetorBordaDireita[i].imag * constFFTBordaDireita;
+                            fftVetorBordaDireita[i].Real = fftVetorBordaDireita[i].Real * constFFTBordaDireita;
+                            fftVetorBordaDireita[i].Imag = fftVetorBordaDireita[i].Imag * constFFTBordaDireita;
                         }
 
 
@@ -1474,8 +1474,8 @@ public partial class HDevelopExport
                         
                         for (int n = 0; n < 40; n++)
                         {
-                            energiaTotalBordaDireita = energiaTotalBordaDireita + Math.Pow(fftVetorBordaDireita[n].real, 2.0) + Math.Pow(fftVetorBordaDireita[n].imag, 2.0) ;
-                            energiaTotalBordaEsquerda = energiaTotalBordaEsquerda + Math.Pow(fftVetorBordaEsquerda[n].real, 2.0) + Math.Pow(fftVetorBordaEsquerda[n].imag, 2.0) ;
+                            energiaTotalBordaDireita = energiaTotalBordaDireita + Math.Pow(fftVetorBordaDireita[n].Real, 2.0) + Math.Pow(fftVetorBordaDireita[n].Imag, 2.0) ;
+                            energiaTotalBordaEsquerda = energiaTotalBordaEsquerda + Math.Pow(fftVetorBordaEsquerda[n].Real, 2.0) + Math.Pow(fftVetorBordaEsquerda[n].Imag, 2.0) ;
                         }
 
                         if (energiaTotalBordaDireita >= energiaTotalBordaEsquerda)
@@ -1598,7 +1598,8 @@ public partial class HDevelopExport
         */
     
         //
-        HOperatorSet.CloseFramegrabber(hv_AcqHandle);
+        //!Retirei essa linha
+        //HOperatorSet.CloseFramegrabber(hv_AcqHandle);
 
         ho_Image.Dispose();
         ho_RectangleEsq.Dispose();

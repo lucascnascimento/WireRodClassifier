@@ -16,6 +16,8 @@ using HalconDotNet;
 using WireRodClassifer_1._0.View;
 using WireRodClassifer_1._0.Model;
 using WireRodClassifer_1._0.Helper_Classes;
+using System.Windows.Forms;
+using System.IO;
 
 namespace WireRodClassifer_1._0
 {
@@ -51,6 +53,7 @@ namespace WireRodClassifer_1._0
 
             concreteMediator.AddParticipant(ConfigDispAquiView);
             ConfigDispAquiView.AddMediator(concreteMediator);
+            fetchFolder();
         }
 
         #endregion
@@ -91,8 +94,47 @@ namespace WireRodClassifer_1._0
             labelStatus.Content = e.Status;
         }
 
+        private void MenuItemSalvar_Click(object sender, RoutedEventArgs e)
+        {
+            FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
+            folderBrowserDialog.Description = "Selecione um local para salvar os arquivos de nota.";
+            DialogResult result = folderBrowserDialog.ShowDialog();
+            if (result == System.Windows.Forms.DialogResult.OK)
+            {
+                var folderPath = folderBrowserDialog.SelectedPath;
+                configAcquisitionDevice.FolderPath = folderPath;
+                Properties.Settings.Default.FolderPath = folderPath;
+                Properties.Settings.Default.Save();
+            }
+
+        }
+
+        private void fetchFolder()
+        {
+            string newFolder = "WireRodClassifierData";
+            string savedFolderPath = Properties.Settings.Default.FolderPath;
+            var newFolderPath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), newFolder);
+
+            if (savedFolderPath == "NoFolder")
+            {
+                Directory.CreateDirectory(newFolderPath);
+                Properties.Settings.Default.FolderPath = newFolderPath;
+                Properties.Settings.Default.Save();
+                configAcquisitionDevice.FolderPath = newFolderPath;
+            }
+            else if (savedFolderPath == newFolderPath)
+            {
+                configAcquisitionDevice.FolderPath = newFolderPath;
+            }
+            else
+            {
+                configAcquisitionDevice.FolderPath = savedFolderPath;
+            }
+        }
 
         #endregion
+
+
     }
    
 }
