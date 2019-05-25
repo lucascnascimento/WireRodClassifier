@@ -23,6 +23,7 @@ public partial class HDevelopExport
 {
     private CancellationToken token;
     public HTuple hv_ExpDefaultWinHandle;
+    private string folderPath;
 
     public void HDevelopStop()
     {
@@ -404,12 +405,13 @@ public partial class HDevelopExport
                     data = CurrentTime.Date.ToString("dd_MM_yyyy");
                     horario = DateTime.Now.ToString("HH_mm_ss_fff tt");// DateTime.Now.TimeOfDay C:\Users\Public\Documents\classificadorDeBobinas
                     // C: \Users\NOTEBOOK\Documents\pesquisas\gerdau\FORMACAODEESPIRAS\FormacaoVideos\CodigoEmC#\HDevelopTemplateWPF\HDevelopTemplateWPF\vs2008
-                    string arquivoNotasNome = "C:\\Users\\Public\\Documents\\classificadorDeBobinas\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\";
+                    //!Subsitiuí a linha abaixo
+                    //string arquivoNotasNome = "C:\\Users\\Public\\Documents\\classificadorDeBobinas\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\";
+                    string arquivoNotasNome = folderPath;
                     //"C:\\Users\\NOTEBOOK\\Documents\\pesquisas\\gerdau\\FORMACAODEESPIRAS\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\";
                     //"C:\\Users\\Public\\Documents\\classificadorDeBobinas\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\";
                     arquivoNotasNome = arquivoNotasNome + "Notas" + "_" + data + "_" + horario + ".txt";
-                    //!Retirar essa parte para testar no my computador - Ass: Lucas
-                    //arquivoNotas = File.CreateText(arquivoNotasNome);
+                    arquivoNotas = File.CreateText(arquivoNotasNome);
                     hv_ImageNum = 0;
                     numeroDeNotas = 0;
                     //string arquivoNotasFiltradasNome = "C:\\Users\\Public\\Documents\\classificadorDeBobinas\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\";
@@ -1567,6 +1569,7 @@ public partial class HDevelopExport
             {
                 HOperatorSet.CloseFramegrabber(hv_AcqHandle);
                 ho_Image.Dispose();
+                arquivoNotas.Close();
                 break;
             }
         }
@@ -1657,11 +1660,13 @@ public partial class HDevelopExport
         HOperatorSet.SetSystem("height", 512);
     }
 
-    public void RunHalcon(HTuple Window, HTuple hv_acqHandle, CancellationToken token)
+    public void RunHalcon(HTuple Window, HTuple hv_acqHandle, CancellationToken token, string folderPath)
     {
         this.token = token;
         hv_ExpDefaultWinHandle = Window;
+        this.folderPath = folderPath;
         action(hv_acqHandle);
+        
     }
 
     /*

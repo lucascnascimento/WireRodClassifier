@@ -41,7 +41,7 @@ namespace WireRodClassifer_1._0.Helper_Classes
             hv_AcqHandle = setOpenFrameGrabber(currentDevice);
             if (hv_AcqHandle != null)
             {
-                HDevExp.RunHalcon(window, hv_AcqHandle, token);
+                HDevExp.RunHalcon(window, hv_AcqHandle, token, currentDevice.FolderPath);
             }
             else
             {
@@ -50,6 +50,10 @@ namespace WireRodClassifer_1._0.Helper_Classes
             //!Pode ocorrer da thread não fechar quando a captura não for bem sucedida
         }
 
+        /// <summary>
+        /// Atenção, esse método é executado somente durante Design Time e não representa a o método de execução final
+        /// </summary>
+        /// <param name="currentDevice"></param>
         private void executeCapturingAndProcessing(ConfigAcquisitionDevice currentDevice)
         {
             // TODO: O opengramgrabber está recebendo uma informação pré-estabelecida, trocar pela informação enviada pelo usuário.
