@@ -878,9 +878,6 @@ public partial class HDevelopExport
 
 
 
-
-
-
                         //==========================================================================
                         //-------------------------------------------------------------------------
                         //--> AJUSTE DO CONTORNO (ELIMINAR PONTOS = AO LADO DIREITO DA RectDirXLD):
