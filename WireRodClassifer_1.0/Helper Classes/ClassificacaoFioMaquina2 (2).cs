@@ -353,192 +353,11 @@ public partial class HDevelopExport
         hv_ImageNum = 0;
         while (true)
         {
-            //Próxima Imagem
-            //hv_ImageNum = hv_ImageNum + 1;
-
-            /*while ((int)(new HTuple(hv_ImageNum.TupleLessEqual(2))) != 0)
+            try
             {
-                //Cada chamada de grab_image() lê o próximo frame de imagem do arquivo
-                ho_Image.Dispose();
-                HOperatorSet.GrabImage(out ho_Image, hv_AcqHandle);
-                hv_ImageNum = hv_ImageNum+1;
-            }
-            */
-            if (ho_Image != null)
-                ho_Image.Dispose();
-            HOperatorSet.GrabImage(out ho_Image, hv_AcqHandle);
-            
-            //***************************************************************************************************
-            //deteccao de inicio e fim da formacao de bobinas
-            if (ho_Roi_Dt_Bb != null)
-                ho_Roi_Dt_Bb.Dispose();
-            HOperatorSet.ReduceDomain(ho_Image, ho_Roi_Dt, out ho_Roi_Dt_Bb);
-            if (HDevWindowStack.IsOpen())
-            {
-                HOperatorSet.DispObj(ho_Roi_Dt_Bb, HDevWindowStack.GetActive());
-            }
-            //-> CONVERSAO ESCALA DE CINZA E ENFATIZANDO REGIÃO:
-            if (ho_Roi_Dt_Bb_Gs != null)
-                ho_Roi_Dt_Bb_Gs.Dispose();
+                //Próxima Imagem
+                //hv_ImageNum = hv_ImageNum + 1;
 
-            //HOperatorSet.DispObj(ho_Roi_Dt_Bb, hv_ExpDefaultWinHandle);
-            
-            HOperatorSet.Rgb1ToGray(ho_Roi_Dt_Bb, out ho_Roi_Dt_Bb_Gs);
-            if (ho_Roi_Dt_Bb_Gs_Emp != null)
-                ho_Roi_Dt_Bb_Gs_Emp.Dispose();
-            HOperatorSet.Emphasize(ho_Roi_Dt_Bb_Gs, out ho_Roi_Dt_Bb_Gs_Emp, 7, 7, 1);
-            //-> INTENSIDADE:
-            HOperatorSet.Intensity(ho_Roi_Dt_Bb_Gs_Emp, ho_Image, out hv_Roi_Med, out hv_Roi_Var);
-            if ((int)(new HTuple(hv_Roi_Med.TupleLess(60))) != 0)
-            {
-                //sinaliza ausencia de material no leito (final da formacao)
-                hv_Pdi_Fm_On = 1;
-            }
-            else
-            {
-                //sinaliza a presenca de material no leito
-                hv_Pdi_Fm_On = 0;
-                // verifica se o atual frame é o primeiro de uma nova bobina
-                if (aguardandoMaterial == 1)
-                {
-                    aguardandoMaterial = 0;
-                    data = CurrentTime.Date.ToString("dd_MM_yyyy");
-                    horario = DateTime.Now.ToString("HH_mm_ss_fff tt");// DateTime.Now.TimeOfDay C:\Users\Public\Documents\classificadorDeBobinas
-                    // C: \Users\NOTEBOOK\Documents\pesquisas\gerdau\FORMACAODEESPIRAS\FormacaoVideos\CodigoEmC#\HDevelopTemplateWPF\HDevelopTemplateWPF\vs2008
-                    //!Subsitiuí a linha abaixo
-                    //string arquivoNotasNome = "C:\\Users\\Public\\Documents\\classificadorDeBobinas\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\";
-                    string arquivoNotasNome = folderPath;
-                    //"C:\\Users\\NOTEBOOK\\Documents\\pesquisas\\gerdau\\FORMACAODEESPIRAS\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\";
-                    //"C:\\Users\\Public\\Documents\\classificadorDeBobinas\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\";
-                    arquivoNotasNome = arquivoNotasNome + "Notas" + "_" + data + "_" + horario + ".txt";
-                    arquivoNotas = File.CreateText(arquivoNotasNome);
-                    hv_ImageNum = 0;
-                    numeroDeNotas = 0;
-                    //string arquivoNotasFiltradasNome = "C:\\Users\\Public\\Documents\\classificadorDeBobinas\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\";
-                    //"C:\\Users\\NOTEBOOK\\Documents\\pesquisas\\gerdau\\FORMACAODEESPIRAS\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\";
-                    //"C:\\Users\\Public\\Documents\\classificadorDeBobinas\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\";
-                    //arquivoNotasFiltradasNome = arquivoNotasFiltradasNome + "NotasFiltradas" + "_" + data + "_" + horario + ".txt";
-                    //arquivoNotasFiltradas = File.CreateText(arquivoNotasFiltradasNome);
-                }
-            }
-            //Eventos disparados ao final da formacao da bobina e na ausência de material
-            if ((int)(new HTuple(hv_Pdi_Fm_On.TupleEqual(1))) != 0)
-            {
-                //grava o arquivo com o vídeo da bobina
-                //compõe o nome do arquivo de vídeo
-
-                // testa se é o primeiro quadro amostrado sem material no leito
-                if ( (aguardandoMaterial == 0) && (numeroDeNotas > 5) )
-                {
-                    //executa ffmpeg para montar o arquivo de video com as imagens gravadas em arquivos png
-                    //HOperatorSet.SystemCall("ffmpeg -framerate 33 -pattern_type sequence -start_number 1 -i \"imagemParaVideo%04d.png\" -vcodec mpeg4 teste8.avi");
-                    //apaga os arquivos de imagens dos frames amostrados do formador
-                    //HOperatorSet.SystemCall("del imagemParaVideo*.png");
-
-                    // ---------------------------------------------------------------------------------------------------------
-                    // ------------------ implementa o filtro de fase nula sobre as notas aplicadas à última bobina ------------
-                    // ---------------------------------------------------------------------------------------------------------
-                    comprimentoNotas = numeroDeNotas;
-                    /*b0 = b(1);
-                    b1 = b(2);
-                    b2 = b(3);
-                    b3 = b(4);
-                    b4 = b(5);
-                    a0 = a(1);
-                    a1 = a(2);
-                    a2 = a(3);
-                    a3 = a(4);
-                    a4 = a(5);*/
-                    
-                    notaFilt[0] = b0 * vetorNotasMedias[0];
-                    notaFilt[1] = b0 * vetorNotasMedias[1] + b1 * vetorNotasMedias[0] - a1 * notaFilt[0];
-                    notaFilt[2] = b0 * vetorNotasMedias[2] + b1 * vetorNotasMedias[1] + b2 * vetorNotasMedias[0] - a1 * notaFilt[1] - a2 * notaFilt[0];
-                    notaFilt[3] = b0 * vetorNotasMedias[3] + b1 * vetorNotasMedias[2] + b2 * vetorNotasMedias[1] + b3 * vetorNotasMedias[0] - a1 * notaFilt[2] - a2 * notaFilt[1] - a3 * notaFilt[0];
-                    //comprimentoNotas = length(nota);
-                    vetorNotasMedias[comprimentoNotas] = 0;
-                    vetorNotasMedias[comprimentoNotas + 1] = 0;
-                    vetorNotasMedias[comprimentoNotas + 2] = 0;
-                    vetorNotasMedias[comprimentoNotas + 3] = 0;
-                    for (int i = 4; i <= (comprimentoNotas-1) ; i++ ) {
-                        notaFilt[i] = b0 * vetorNotasMedias[i] + b1 * vetorNotasMedias[i - 1] + b2 * vetorNotasMedias[i - 2] + b3 * vetorNotasMedias[i - 3] + b4 * vetorNotasMedias[i - 4] - a1 * notaFilt[i - 1] - a2 * notaFilt[i - 2] - a3 * notaFilt[i - 3] - a4 * notaFilt[i - 4];
-                    }
-
-                    notaFilt[comprimentoNotas] = b1 * vetorNotasMedias[comprimentoNotas-1] + b2 * vetorNotasMedias[comprimentoNotas - 2] + b3 * vetorNotasMedias[comprimentoNotas - 3] + b4 * vetorNotasMedias[comprimentoNotas - 4] - a1 * notaFilt[comprimentoNotas-1] - a2 * notaFilt[comprimentoNotas - 2] - a3 * notaFilt[comprimentoNotas - 3] - a4 * notaFilt[comprimentoNotas - 4];
-                    notaFilt[comprimentoNotas + 1] = b2 * vetorNotasMedias[comprimentoNotas-1] + b3 * vetorNotasMedias[comprimentoNotas - 2] + b4 * vetorNotasMedias[comprimentoNotas - 3] - a1 * notaFilt[comprimentoNotas] - a2 * notaFilt[comprimentoNotas - 1] - a3 * notaFilt[comprimentoNotas - 2] - a4 * notaFilt[comprimentoNotas - 3];
-                    notaFilt[comprimentoNotas + 2] = b3 * vetorNotasMedias[comprimentoNotas-1] + b4 * vetorNotasMedias[comprimentoNotas - 2] - a1 * notaFilt[comprimentoNotas + 1] - a2 * notaFilt[comprimentoNotas] - a3 * notaFilt[comprimentoNotas - 1] - a4 * notaFilt[comprimentoNotas - 2];
-                    notaFilt[comprimentoNotas + 3] = b4 * vetorNotasMedias[comprimentoNotas-1] - a1 * notaFilt[comprimentoNotas + 2] - a2 * notaFilt[comprimentoNotas + 1] - a3 * notaFilt[comprimentoNotas] - a4 * notaFilt[comprimentoNotas-1];
-                    notaFilt[comprimentoNotas + 4] = -a1 * notaFilt[comprimentoNotas + 3] - a2 * notaFilt[comprimentoNotas + 2] - a3 * notaFilt[comprimentoNotas + 1] - a4 * notaFilt[comprimentoNotas];
-                    notaFilt[comprimentoNotas + 5] = -a1 * notaFilt[comprimentoNotas + 4] - a2 * notaFilt[comprimentoNotas + 3] - a3 * notaFilt[comprimentoNotas + 2] - a4 * notaFilt[comprimentoNotas + 1];
-                    notaFilt[comprimentoNotas + 6] = -a1 * notaFilt[comprimentoNotas + 5] - a2 * notaFilt[comprimentoNotas + 4] - a3 * notaFilt[comprimentoNotas + 3] - a4 * notaFilt[comprimentoNotas + 2];
-                    notaFilt[comprimentoNotas + 7] = -a1 * notaFilt[comprimentoNotas + 6] - a2 * notaFilt[comprimentoNotas + 5] - a3 * notaFilt[comprimentoNotas + 4] - a4 * notaFilt[comprimentoNotas + 3];
-
-                    comprimentoVetorNotasFiltradas = comprimentoNotas + 7;// length(notaFilt);
-                    for ( int i = 0; i <= (comprimentoVetorNotasFiltradas-1); i++) {
-                        notaFiltInvertida[i] = notaFilt[comprimentoVetorNotasFiltradas - (i + 1)];
-                    }
-
-                    notaFilt2[0] = b0 * notaFiltInvertida[0];
-                    notaFilt2[1] = b0 * notaFiltInvertida[1] + b1 * notaFiltInvertida[0] - a1 * notaFilt2[0];
-                    notaFilt2[2] = b0 * notaFiltInvertida[2] + b1 * notaFiltInvertida[1] + b2 * notaFiltInvertida[0] - a1 * notaFilt2[1] - a2 * notaFilt2[0];
-                    notaFilt2[3] = b0 * notaFiltInvertida[3] + b1 * notaFiltInvertida[2] + b2 * notaFiltInvertida[1] + b3 * notaFiltInvertida[0] - a1 * notaFilt2[2] - a2 * notaFilt2[1] - a3 * notaFilt2[0];
-
-                    for ( int i = 4; i <= comprimentoVetorNotasFiltradas; i++ ) { // length(notaFiltInvertida) {
-                        notaFilt2[i] = b0 * notaFiltInvertida[i] + b1 * notaFiltInvertida[i - 1] + b2 * notaFiltInvertida[i - 2] + b3 * notaFiltInvertida[i - 3] + b4 * notaFiltInvertida[i - 4] - a1 * notaFilt2[i - 1] - a2 * notaFilt2[i - 2] - a3 * notaFilt2[i - 3] - a4 * notaFilt2[i - 4];
-                    }
-
-                    //comprimentoVetorNotasFiltradas = length(notaFilt2);
-                    for ( int i = 0; i <= (comprimentoVetorNotasFiltradas-1); i++ ) { 
-                      notaFilt2Invertida[i] = notaFilt2[comprimentoVetorNotasFiltradas - (i + 1)];
-                    }
-
-                    /*
-                    for (int i = 0 ; i < notaFilt2Invertida.Length ; i++)
-                    {
-                        arquivoNotasFiltradas.WriteLine(notaFilt2Invertida[i].ToString("N", nfi));
-                        //arquivoPontosBordaDireita.WriteLine(y[i].real.ToString("N", nfi) + " " + y[i].imag.ToString("N", nfi));
-                    }*/
-                    for (int i = 0; i < comprimentoNotas; i++)
-                    {
-
-                        //arquivoNotasFiltradas.WriteLine(notaFilt2Invertida[i].ToString("N", nfi));
-                        //arquivoPontosBordaDireita.WriteLine(y[i].real.ToString("N", nfi) + " " + y[i].imag.ToString("N", nfi));
-                        if (notaFilt2Invertida[i] < 0)
-                            notaFilt2Invertida[i] = 0;
-                        arquivoNotas.WriteLine(vetorDatas[i] + "  " + vetorHorarios[i] + "  " + vetorNotasPeloEspectro[i].ToString("N", nfi) + "  " + vetorNotasPelosBuracos[i].ToString("N", nfi) + "  " + vetorNotasMedias[i].ToString("N", nfi) + "  " + notaFilt2Invertida[i].ToString("N", nfi) + "  " +comprimentoNotas.ToString("N", nfi));
-                    }
-                    //arquivoNotasFiltradas.Close();
-                    // ----------------------------------------------------------------------------------------------------
-                    // ----------------------------- fim do filtro de fase nula ------------------------------------------
-                    // ---------------------------------------------------------------------------------------------------
-
-
-                    //fecha o arquivo txt com as notas das bordas
-                    arquivoNotas.Close();
-                    // sinaliza que o sistema está esperando a próxima bobina
-                    aguardandoMaterial = 1;
-                    // reinicializa o contador de quadros
-                    hv_ImageNum = 0;
-                }
-
-            }
-            //if (hv_ImageNum == 199)
-            //    hv_ImageNum = hv_ImageNum;
-
-            //Eventos disparados durante a formacao da bobina
-            if ((int)(new HTuple(hv_Pdi_Fm_On.TupleEqual(0))) != 0)
-            {
-                //ho_Image.Dispose();
-                //HOperatorSet.GrabImage(out ho_Image, hv_AcqHandle);
-                hv_ImageNum = hv_ImageNum + 1;
-                //**************************************************************************************************
-                //gravação da imagem adquirida da câmera
-                /*
-                hv_nomeArquivoVideoSaida = "C:\\Users\\Administrador\\Documents\\classificadorDeBobinas\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\imagemParaVideo";
-                HOperatorSet.TupleString(hv_ImageNum, "04d", out hv_ImageNumString);
-                HOperatorSet.TupleAdd(hv_nomeArquivoVideoSaida, hv_ImageNumString, out hv_nomeArquivoVideoSaida);
-                HOperatorSet.TupleAdd(hv_nomeArquivoVideoSaida, ".png", out hv_nomeArquivoVideoSaida);
-                HOperatorSet.WriteImage(ho_Image, "png fastest", 255, hv_nomeArquivoVideoSaida);
-                */
                 /*while ((int)(new HTuple(hv_ImageNum.TupleLessEqual(2))) != 0)
                 {
                     //Cada chamada de grab_image() lê o próximo frame de imagem do arquivo
@@ -547,470 +366,404 @@ public partial class HDevelopExport
                     hv_ImageNum = hv_ImageNum+1;
                 }
                 */
+                if (ho_Image != null)
+                    ho_Image.Dispose();
+                HOperatorSet.GrabImage(out ho_Image, hv_AcqHandle);
 
-
-                //**************************************************************************************************
-                //Tratamento da imagem à Esquerda
-                ho_ImageReducedEsq.Dispose();
-                HOperatorSet.ReduceDomain(ho_Image, ho_RectangleEsq, out ho_ImageReducedEsq
-                  );
-                ho_GrayImageEsq.Dispose();
-                HOperatorSet.Rgb1ToGray(ho_ImageReducedEsq, out ho_GrayImageEsq);
-                ho_ImageEmphasizeEsq.Dispose();
-                HOperatorSet.Emphasize(ho_GrayImageEsq, out ho_ImageEmphasizeEsq, 7, 7, 0.2);
-
-                //Filtro de cinza
-                HOperatorSet.SetColor(hv_ExpDefaultWinHandle, "black");
-                ho_RegionEsq.Dispose();
-                HOperatorSet.Threshold(ho_ImageEmphasizeEsq, out ho_RegionEsq, 140, 255);
-
-                //Gera um contorno xld da região
-                ho_ContoursEsq.Dispose();
-                HOperatorSet.GenContourRegionXld(ho_RegionEsq, out ho_ContoursEsq, "center");
-
-                HOperatorSet.DispObj(ho_ContoursEsq, hv_ExpDefaultWinHandle);
-                //HOperatorSet.DispObj(hv_RectTopo, hv_ExpDefaultWinHandle);
-                HOperatorSet.DispObj(ho_Image, hv_ExpDefaultWinHandle);
-
-
-                //Separa o contorno da região à esquerda e o filtra por comprimento
-                HOperatorSet.SetColor(hv_ExpDefaultWinHandle, "white");
-                ho_FullLeftContour.Dispose();
-                HOperatorSet.ClipContoursXld(ho_ContoursEsq, out ho_FullLeftContour, hv_RectEsqXLD.TupleSelect(
-                  0), hv_RectEsqXLD.TupleSelect(1), hv_RectEsqXLD.TupleSelect(2), hv_RectEsqXLD.TupleSelect(
-                  3));
-                ho_ContornoEsq.Dispose();
-                HOperatorSet.SelectContoursXld(ho_FullLeftContour, out ho_ContornoEsq, "contour_length",
-                  70, 3000, -0.5, 0.5);
-
-                HOperatorSet.DispObj(ho_ContornoEsq, hv_ExpDefaultWinHandle);
-
-                //ho_ContornoEsq2.Dispose();
-                //HOperatorSet.SelectContoursXld(ho_ContornoEsq, out ho_ContornoEsq2, "open", 50, 100, -0.5, 0.5);
-
-                //ho_ContornoEsq.Dispose();
-                //ho_ContornoEsq = ho_ContornoEsq2.CopyObj(1,-1);
-
-                //Código para selecionar a maior dentre as bordas identificadas do lado esquerdo
-                hv_ContornoEsqMax = 0;
-                HOperatorSet.LengthXld(ho_ContornoEsq, out hv_comprimentosBordaEsquerda);
-                HOperatorSet.TupleLength(hv_comprimentosBordaEsquerda, out hv_tamanhoVetorBordasEsquerda);
-                if (hv_tamanhoVetorBordasEsquerda != 0)
+                //***************************************************************************************************
+                //deteccao de inicio e fim da formacao de bobinas
+                if (ho_Roi_Dt_Bb != null)
+                    ho_Roi_Dt_Bb.Dispose();
+                HOperatorSet.ReduceDomain(ho_Image, ho_Roi_Dt, out ho_Roi_Dt_Bb);
+                if (HDevWindowStack.IsOpen())
                 {
-                    //hv_tamanhoVetorBordasEsquerda = 0;
+                    HOperatorSet.DispObj(ho_Roi_Dt_Bb, HDevWindowStack.GetActive());
+                }
+                //-> CONVERSAO ESCALA DE CINZA E ENFATIZANDO REGIÃO:
+                if (ho_Roi_Dt_Bb_Gs != null)
+                    ho_Roi_Dt_Bb_Gs.Dispose();
 
+                //HOperatorSet.DispObj(ho_Roi_Dt_Bb, hv_ExpDefaultWinHandle);
 
-                    if ((int)(new HTuple(hv_tamanhoVetorBordasEsquerda.TupleGreater(1))) != 0)
+                HOperatorSet.Rgb1ToGray(ho_Roi_Dt_Bb, out ho_Roi_Dt_Bb_Gs);
+                if (ho_Roi_Dt_Bb_Gs_Emp != null)
+                    ho_Roi_Dt_Bb_Gs_Emp.Dispose();
+                HOperatorSet.Emphasize(ho_Roi_Dt_Bb_Gs, out ho_Roi_Dt_Bb_Gs_Emp, 7, 7, 1);
+                //-> INTENSIDADE:
+                HOperatorSet.Intensity(ho_Roi_Dt_Bb_Gs_Emp, ho_Image, out hv_Roi_Med, out hv_Roi_Var);
+                if ((int)(new HTuple(hv_Roi_Med.TupleLess(60))) != 0)
+                {
+                    //sinaliza ausencia de material no leito (final da formacao)
+                    hv_Pdi_Fm_On = 1;
+                }
+                else
+                {
+                    //sinaliza a presenca de material no leito
+                    hv_Pdi_Fm_On = 0;
+                    // verifica se o atual frame é o primeiro de uma nova bobina
+                    if (aguardandoMaterial == 1)
                     {
-                        HTuple end_val100 = hv_tamanhoVetorBordasEsquerda - 1;
-                        HTuple step_val100 = 1;
-                        for (hv_index = 0; hv_index.Continue(end_val100, step_val100); hv_index = hv_index.TupleAdd(step_val100))
+                        aguardandoMaterial = 0;
+                        data = CurrentTime.Date.ToString("dd_MM_yyyy");
+                        horario = DateTime.Now.ToString("HH_mm_ss_fff tt");// DateTime.Now.TimeOfDay C:\Users\Public\Documents\classificadorDeBobinas
+                                                                           // C: \Users\NOTEBOOK\Documents\pesquisas\gerdau\FORMACAODEESPIRAS\FormacaoVideos\CodigoEmC#\HDevelopTemplateWPF\HDevelopTemplateWPF\vs2008
+                                                                           //!Subsitiuí a linha abaixo
+                                                                           //string arquivoNotasNome = "C:\\Users\\Public\\Documents\\classificadorDeBobinas\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\";
+                        string arquivoNotasNome = folderPath;
+                        //"C:\\Users\\NOTEBOOK\\Documents\\pesquisas\\gerdau\\FORMACAODEESPIRAS\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\";
+                        //"C:\\Users\\Public\\Documents\\classificadorDeBobinas\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\";
+                        arquivoNotasNome = arquivoNotasNome + "Notas" + "_" + data + "_" + horario + ".txt";
+                        arquivoNotas = File.CreateText(arquivoNotasNome);
+                        hv_ImageNum = 0;
+                        numeroDeNotas = 0;
+                        //string arquivoNotasFiltradasNome = "C:\\Users\\Public\\Documents\\classificadorDeBobinas\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\";
+                        //"C:\\Users\\NOTEBOOK\\Documents\\pesquisas\\gerdau\\FORMACAODEESPIRAS\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\";
+                        //"C:\\Users\\Public\\Documents\\classificadorDeBobinas\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\";
+                        //arquivoNotasFiltradasNome = arquivoNotasFiltradasNome + "NotasFiltradas" + "_" + data + "_" + horario + ".txt";
+                        //arquivoNotasFiltradas = File.CreateText(arquivoNotasFiltradasNome);
+                    }
+                }
+                //Eventos disparados ao final da formacao da bobina e na ausência de material
+                if ((int)(new HTuple(hv_Pdi_Fm_On.TupleEqual(1))) != 0)
+                {
+                    //grava o arquivo com o vídeo da bobina
+                    //compõe o nome do arquivo de vídeo
+
+                    // testa se é o primeiro quadro amostrado sem material no leito
+                    if ((aguardandoMaterial == 0) && (numeroDeNotas > 5))
+                    {
+                        //executa ffmpeg para montar o arquivo de video com as imagens gravadas em arquivos png
+                        //HOperatorSet.SystemCall("ffmpeg -framerate 33 -pattern_type sequence -start_number 1 -i \"imagemParaVideo%04d.png\" -vcodec mpeg4 teste8.avi");
+                        //apaga os arquivos de imagens dos frames amostrados do formador
+                        //HOperatorSet.SystemCall("del imagemParaVideo*.png");
+
+                        // ---------------------------------------------------------------------------------------------------------
+                        // ------------------ implementa o filtro de fase nula sobre as notas aplicadas à última bobina ------------
+                        // ---------------------------------------------------------------------------------------------------------
+                        comprimentoNotas = numeroDeNotas;
+                        /*b0 = b(1);
+                        b1 = b(2);
+                        b2 = b(3);
+                        b3 = b(4);
+                        b4 = b(5);
+                        a0 = a(1);
+                        a1 = a(2);
+                        a2 = a(3);
+                        a3 = a(4);
+                        a4 = a(5);*/
+
+                        notaFilt[0] = b0 * vetorNotasMedias[0];
+                        notaFilt[1] = b0 * vetorNotasMedias[1] + b1 * vetorNotasMedias[0] - a1 * notaFilt[0];
+                        notaFilt[2] = b0 * vetorNotasMedias[2] + b1 * vetorNotasMedias[1] + b2 * vetorNotasMedias[0] - a1 * notaFilt[1] - a2 * notaFilt[0];
+                        notaFilt[3] = b0 * vetorNotasMedias[3] + b1 * vetorNotasMedias[2] + b2 * vetorNotasMedias[1] + b3 * vetorNotasMedias[0] - a1 * notaFilt[2] - a2 * notaFilt[1] - a3 * notaFilt[0];
+                        //comprimentoNotas = length(nota);
+                        vetorNotasMedias[comprimentoNotas] = 0;
+                        vetorNotasMedias[comprimentoNotas + 1] = 0;
+                        vetorNotasMedias[comprimentoNotas + 2] = 0;
+                        vetorNotasMedias[comprimentoNotas + 3] = 0;
+                        for (int i = 4; i <= (comprimentoNotas - 1); i++)
                         {
-                            if ((int)(new HTuple(((hv_comprimentosBordaEsquerda.TupleSelect(hv_index))).TupleGreater(
-                                hv_ContornoEsqMax))) != 0)
+                            notaFilt[i] = b0 * vetorNotasMedias[i] + b1 * vetorNotasMedias[i - 1] + b2 * vetorNotasMedias[i - 2] + b3 * vetorNotasMedias[i - 3] + b4 * vetorNotasMedias[i - 4] - a1 * notaFilt[i - 1] - a2 * notaFilt[i - 2] - a3 * notaFilt[i - 3] - a4 * notaFilt[i - 4];
+                        }
+
+                        notaFilt[comprimentoNotas] = b1 * vetorNotasMedias[comprimentoNotas - 1] + b2 * vetorNotasMedias[comprimentoNotas - 2] + b3 * vetorNotasMedias[comprimentoNotas - 3] + b4 * vetorNotasMedias[comprimentoNotas - 4] - a1 * notaFilt[comprimentoNotas - 1] - a2 * notaFilt[comprimentoNotas - 2] - a3 * notaFilt[comprimentoNotas - 3] - a4 * notaFilt[comprimentoNotas - 4];
+                        notaFilt[comprimentoNotas + 1] = b2 * vetorNotasMedias[comprimentoNotas - 1] + b3 * vetorNotasMedias[comprimentoNotas - 2] + b4 * vetorNotasMedias[comprimentoNotas - 3] - a1 * notaFilt[comprimentoNotas] - a2 * notaFilt[comprimentoNotas - 1] - a3 * notaFilt[comprimentoNotas - 2] - a4 * notaFilt[comprimentoNotas - 3];
+                        notaFilt[comprimentoNotas + 2] = b3 * vetorNotasMedias[comprimentoNotas - 1] + b4 * vetorNotasMedias[comprimentoNotas - 2] - a1 * notaFilt[comprimentoNotas + 1] - a2 * notaFilt[comprimentoNotas] - a3 * notaFilt[comprimentoNotas - 1] - a4 * notaFilt[comprimentoNotas - 2];
+                        notaFilt[comprimentoNotas + 3] = b4 * vetorNotasMedias[comprimentoNotas - 1] - a1 * notaFilt[comprimentoNotas + 2] - a2 * notaFilt[comprimentoNotas + 1] - a3 * notaFilt[comprimentoNotas] - a4 * notaFilt[comprimentoNotas - 1];
+                        notaFilt[comprimentoNotas + 4] = -a1 * notaFilt[comprimentoNotas + 3] - a2 * notaFilt[comprimentoNotas + 2] - a3 * notaFilt[comprimentoNotas + 1] - a4 * notaFilt[comprimentoNotas];
+                        notaFilt[comprimentoNotas + 5] = -a1 * notaFilt[comprimentoNotas + 4] - a2 * notaFilt[comprimentoNotas + 3] - a3 * notaFilt[comprimentoNotas + 2] - a4 * notaFilt[comprimentoNotas + 1];
+                        notaFilt[comprimentoNotas + 6] = -a1 * notaFilt[comprimentoNotas + 5] - a2 * notaFilt[comprimentoNotas + 4] - a3 * notaFilt[comprimentoNotas + 3] - a4 * notaFilt[comprimentoNotas + 2];
+                        notaFilt[comprimentoNotas + 7] = -a1 * notaFilt[comprimentoNotas + 6] - a2 * notaFilt[comprimentoNotas + 5] - a3 * notaFilt[comprimentoNotas + 4] - a4 * notaFilt[comprimentoNotas + 3];
+
+                        comprimentoVetorNotasFiltradas = comprimentoNotas + 7;// length(notaFilt);
+                        for (int i = 0; i <= (comprimentoVetorNotasFiltradas - 1); i++)
+                        {
+                            notaFiltInvertida[i] = notaFilt[comprimentoVetorNotasFiltradas - (i + 1)];
+                        }
+
+                        notaFilt2[0] = b0 * notaFiltInvertida[0];
+                        notaFilt2[1] = b0 * notaFiltInvertida[1] + b1 * notaFiltInvertida[0] - a1 * notaFilt2[0];
+                        notaFilt2[2] = b0 * notaFiltInvertida[2] + b1 * notaFiltInvertida[1] + b2 * notaFiltInvertida[0] - a1 * notaFilt2[1] - a2 * notaFilt2[0];
+                        notaFilt2[3] = b0 * notaFiltInvertida[3] + b1 * notaFiltInvertida[2] + b2 * notaFiltInvertida[1] + b3 * notaFiltInvertida[0] - a1 * notaFilt2[2] - a2 * notaFilt2[1] - a3 * notaFilt2[0];
+
+                        for (int i = 4; i <= comprimentoVetorNotasFiltradas; i++)
+                        { // length(notaFiltInvertida) {
+                            notaFilt2[i] = b0 * notaFiltInvertida[i] + b1 * notaFiltInvertida[i - 1] + b2 * notaFiltInvertida[i - 2] + b3 * notaFiltInvertida[i - 3] + b4 * notaFiltInvertida[i - 4] - a1 * notaFilt2[i - 1] - a2 * notaFilt2[i - 2] - a3 * notaFilt2[i - 3] - a4 * notaFilt2[i - 4];
+                        }
+
+                        //comprimentoVetorNotasFiltradas = length(notaFilt2);
+                        for (int i = 0; i <= (comprimentoVetorNotasFiltradas - 1); i++)
+                        {
+                            notaFilt2Invertida[i] = notaFilt2[comprimentoVetorNotasFiltradas - (i + 1)];
+                        }
+
+                        /*
+                        for (int i = 0 ; i < notaFilt2Invertida.Length ; i++)
+                        {
+                            arquivoNotasFiltradas.WriteLine(notaFilt2Invertida[i].ToString("N", nfi));
+                            //arquivoPontosBordaDireita.WriteLine(y[i].real.ToString("N", nfi) + " " + y[i].imag.ToString("N", nfi));
+                        }*/
+                        for (int i = 0; i < comprimentoNotas; i++)
+                        {
+
+                            //arquivoNotasFiltradas.WriteLine(notaFilt2Invertida[i].ToString("N", nfi));
+                            //arquivoPontosBordaDireita.WriteLine(y[i].real.ToString("N", nfi) + " " + y[i].imag.ToString("N", nfi));
+                            if (notaFilt2Invertida[i] < 0)
+                                notaFilt2Invertida[i] = 0;
+                            arquivoNotas.WriteLine(vetorDatas[i] + "  " + vetorHorarios[i] + "  " + vetorNotasPeloEspectro[i].ToString("N", nfi) + "  " + vetorNotasPelosBuracos[i].ToString("N", nfi) + "  " + vetorNotasMedias[i].ToString("N", nfi) + "  " + notaFilt2Invertida[i].ToString("N", nfi) + "  " + comprimentoNotas.ToString("N", nfi));
+                        }
+                        //arquivoNotasFiltradas.Close();
+                        // ----------------------------------------------------------------------------------------------------
+                        // ----------------------------- fim do filtro de fase nula ------------------------------------------
+                        // ---------------------------------------------------------------------------------------------------
+
+
+                        //fecha o arquivo txt com as notas das bordas
+                        arquivoNotas.Close();
+                        // sinaliza que o sistema está esperando a próxima bobina
+                        aguardandoMaterial = 1;
+                        // reinicializa o contador de quadros
+                        hv_ImageNum = 0;
+                    }
+
+                }
+                //if (hv_ImageNum == 199)
+                //    hv_ImageNum = hv_ImageNum;
+
+                //Eventos disparados durante a formacao da bobina
+                if ((int)(new HTuple(hv_Pdi_Fm_On.TupleEqual(0))) != 0)
+                {
+                    //ho_Image.Dispose();
+                    //HOperatorSet.GrabImage(out ho_Image, hv_AcqHandle);
+                    hv_ImageNum = hv_ImageNum + 1;
+                    //**************************************************************************************************
+                    //gravação da imagem adquirida da câmera
+                    /*
+                    hv_nomeArquivoVideoSaida = "C:\\Users\\Administrador\\Documents\\classificadorDeBobinas\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\imagemParaVideo";
+                    HOperatorSet.TupleString(hv_ImageNum, "04d", out hv_ImageNumString);
+                    HOperatorSet.TupleAdd(hv_nomeArquivoVideoSaida, hv_ImageNumString, out hv_nomeArquivoVideoSaida);
+                    HOperatorSet.TupleAdd(hv_nomeArquivoVideoSaida, ".png", out hv_nomeArquivoVideoSaida);
+                    HOperatorSet.WriteImage(ho_Image, "png fastest", 255, hv_nomeArquivoVideoSaida);
+                    */
+                    /*while ((int)(new HTuple(hv_ImageNum.TupleLessEqual(2))) != 0)
+                    {
+                        //Cada chamada de grab_image() lê o próximo frame de imagem do arquivo
+                        ho_Image.Dispose();
+                        HOperatorSet.GrabImage(out ho_Image, hv_AcqHandle);
+                        hv_ImageNum = hv_ImageNum+1;
+                    }
+                    */
+
+
+                    //**************************************************************************************************
+                    //Tratamento da imagem à Esquerda
+                    ho_ImageReducedEsq.Dispose();
+                    HOperatorSet.ReduceDomain(ho_Image, ho_RectangleEsq, out ho_ImageReducedEsq
+                      );
+                    ho_GrayImageEsq.Dispose();
+                    HOperatorSet.Rgb1ToGray(ho_ImageReducedEsq, out ho_GrayImageEsq);
+                    ho_ImageEmphasizeEsq.Dispose();
+                    HOperatorSet.Emphasize(ho_GrayImageEsq, out ho_ImageEmphasizeEsq, 7, 7, 0.2);
+
+                    //Filtro de cinza
+                    HOperatorSet.SetColor(hv_ExpDefaultWinHandle, "black");
+                    ho_RegionEsq.Dispose();
+                    HOperatorSet.Threshold(ho_ImageEmphasizeEsq, out ho_RegionEsq, 140, 255);
+
+                    //Gera um contorno xld da região
+                    ho_ContoursEsq.Dispose();
+                    HOperatorSet.GenContourRegionXld(ho_RegionEsq, out ho_ContoursEsq, "center");
+
+                    HOperatorSet.DispObj(ho_ContoursEsq, hv_ExpDefaultWinHandle);
+                    //HOperatorSet.DispObj(hv_RectTopo, hv_ExpDefaultWinHandle);
+                    HOperatorSet.DispObj(ho_Image, hv_ExpDefaultWinHandle);
+
+
+                    //Separa o contorno da região à esquerda e o filtra por comprimento
+                    HOperatorSet.SetColor(hv_ExpDefaultWinHandle, "white");
+                    ho_FullLeftContour.Dispose();
+                    HOperatorSet.ClipContoursXld(ho_ContoursEsq, out ho_FullLeftContour, hv_RectEsqXLD.TupleSelect(
+                      0), hv_RectEsqXLD.TupleSelect(1), hv_RectEsqXLD.TupleSelect(2), hv_RectEsqXLD.TupleSelect(
+                      3));
+                    ho_ContornoEsq.Dispose();
+                    HOperatorSet.SelectContoursXld(ho_FullLeftContour, out ho_ContornoEsq, "contour_length",
+                      70, 3000, -0.5, 0.5);
+
+                    HOperatorSet.DispObj(ho_ContornoEsq, hv_ExpDefaultWinHandle);
+
+                    //ho_ContornoEsq2.Dispose();
+                    //HOperatorSet.SelectContoursXld(ho_ContornoEsq, out ho_ContornoEsq2, "open", 50, 100, -0.5, 0.5);
+
+                    //ho_ContornoEsq.Dispose();
+                    //ho_ContornoEsq = ho_ContornoEsq2.CopyObj(1,-1);
+
+                    //Código para selecionar a maior dentre as bordas identificadas do lado esquerdo
+                    hv_ContornoEsqMax = 0;
+                    HOperatorSet.LengthXld(ho_ContornoEsq, out hv_comprimentosBordaEsquerda);
+                    HOperatorSet.TupleLength(hv_comprimentosBordaEsquerda, out hv_tamanhoVetorBordasEsquerda);
+                    if (hv_tamanhoVetorBordasEsquerda != 0)
+                    {
+                        //hv_tamanhoVetorBordasEsquerda = 0;
+
+
+                        if ((int)(new HTuple(hv_tamanhoVetorBordasEsquerda.TupleGreater(1))) != 0)
+                        {
+                            HTuple end_val100 = hv_tamanhoVetorBordasEsquerda - 1;
+                            HTuple step_val100 = 1;
+                            for (hv_index = 0; hv_index.Continue(end_val100, step_val100); hv_index = hv_index.TupleAdd(step_val100))
                             {
-                                hv_indexMaiorContorno = hv_index.Clone();
-                                hv_ContornoEsqMax = hv_comprimentosBordaEsquerda.TupleSelect(hv_index);
+                                if ((int)(new HTuple(((hv_comprimentosBordaEsquerda.TupleSelect(hv_index))).TupleGreater(
+                                    hv_ContornoEsqMax))) != 0)
+                                {
+                                    hv_indexMaiorContorno = hv_index.Clone();
+                                    hv_ContornoEsqMax = hv_comprimentosBordaEsquerda.TupleSelect(hv_index);
+                                }
                             }
-                        }
-                        if (ho_ContornoEsqAux != null)
-                            ho_ContornoEsqAux.Dispose();
-                        HOperatorSet.SelectContoursXld(ho_ContornoEsq, out ho_ContornoEsqAux, "contour_length",
-                            hv_ContornoEsqMax, 3000, -0.5, 0.5);
-                        ho_ContornoEsq.Dispose();
-                        ho_ContornoEsq = ho_ContornoEsqAux.CopyObj(1, -1);
-                    }
-
-
-
-                    //==========================================================================
-                    //--> AJUSTE DO CONTORNO (ELIMINAR PONTOS = AO LADO ESQUERDO DA RectEsqXLD):
-                    //- Indices dos pontos do contorno:
-                    HOperatorSet.GetContourXld(ho_ContornoEsq, out hv_LContEsq, out hv_CContEsq);
-                    //- Teste Contorno <ContornoEsq> Vazio:
-                    HOperatorSet.TupleType(hv_LContEsq, out hv_VarVazia);
-                    if ((int)(new HTuple(hv_VarVazia.TupleEqual(15))) != 0)
-                    {
-                        if (hv_LContEsq == null)
-                            hv_LContEsq = new HTuple();
-                        hv_LContEsq[0] = -1;
-                    }
-                    else if ((int)(new HTuple(hv_VarVazia.TupleEqual(2))) != 0)
-                    {
-                        //- Quantidade de índices de Coluna do Contorno:
-                        HOperatorSet.TupleLength(hv_CContEsq, out hv_CContEsqQt);
-                        //- Quantidade de índices de Linhas do Contorno:
-                        HOperatorSet.TupleLength(hv_LContEsq, out hv_LContEsqQt);
-                    }
-                    if ((int)(new HTuple(((hv_LContEsq.TupleSelect(0))).TupleEqual(hv_RectEsqXLD.TupleSelect(
-                        2)))) != 0)
-                    {
-                        //- Cálculo 25% Qt Colunas do Contorno:
-                        HOperatorSet.TupleCeil(hv_CContEsqQt * 0.90, out hv_DetLimAval);
-                        //- Separa 25% Índices Contorno
-                        HOperatorSet.TupleFirstN(hv_CContEsq, hv_DetLimAval, out hv_CContEsqFN);
-                        //- Verifica Qt Índices do TRECHO DO Contorno com = valor de coluna Dir da RectEsqXLD
-                        HOperatorSet.TupleFind(hv_CContEsqFN, hv_RectEsqXLD.TupleSelect(1), out hv_IndColEsq);
-                        HOperatorSet.TupleSum(hv_IndColEsq, out hv_SIndColEsq);
-                        HOperatorSet.TupleLength(hv_IndColEsq, out hv_QtIndColEsq);
-                        //- Se há índices Col Esq Contorno = Col RectEsqXLD
-                        if ((int)(new HTuple(hv_SIndColEsq.TupleGreaterEqual(0))) != 0)
-                        {
-                            //- Porcentagem Qtde índices Col Esq Coincidentes
-                            hv_DetLimEsq = ((hv_QtIndColEsq.TupleReal()) / (hv_DetLimAval.TupleReal()
-                                )) * 100;
-                            //- Se não há índices Col Esq Contorno = Col Esq RectEsqXLD
-                        }
-                        else if ((int)(new HTuple(hv_SIndColEsq.TupleLess(0))) != 0)
-                        {
-                            //- Não há índices Col Esq Coincidentes
-                            hv_DetLimEsq = -1;
-                        }
-                        //- Se a quantidade de índices coincidentes > 20%
-                        if ((int)(new HTuple(hv_DetLimEsq.TupleGreater(20))) != 0)
-                        {
-                            hv_VarTamObj = 100;
-                            ho_ContornoEsqRed.Dispose();
-                            HOperatorSet.ClipContoursXld(ho_ContornoEsq, out ho_ContornoEsqRed, hv_RectEsqXLD.TupleSelect(
-                                0), hv_RectEsqXLD.TupleSelect(1), hv_LContEsq.TupleSelect(hv_QtIndColEsq - 1),
-                                hv_RectEsqXLD.TupleSelect(3));
-                            ho_ContornoEsqAux.Dispose();
-                            HOperatorSet.SelectContoursXld(ho_ContornoEsqRed, out ho_ContornoEsqAux,
-                                "open", hv_VarTamObj, 3000, -0.5, 0.5);
-                            //- Verifica Qtde Objetos em <ContornoEsqAux>:
-                            HOperatorSet.CountObj(ho_ContornoEsqAux, out hv_VarNumObj);
-                            //- Altera a Seleção para Manter o Objeto Maior:
-                            while ((int)(new HTuple(hv_VarNumObj.TupleGreater(1))) != 0)
-                            {
-                                hv_VarTamObj = hv_VarTamObj + 1;
+                            if (ho_ContornoEsqAux != null)
                                 ho_ContornoEsqAux.Dispose();
-                                HOperatorSet.SelectContoursXld(ho_ContornoEsqRed, out ho_ContornoEsqAux,
-                                    "open", hv_VarTamObj, 3000, -0.5, 0.5);
-                                HOperatorSet.CountObj(ho_ContornoEsqAux, out hv_VarNumObj);
-                            }
+                            HOperatorSet.SelectContoursXld(ho_ContornoEsq, out ho_ContornoEsqAux, "contour_length",
+                                hv_ContornoEsqMax, 3000, -0.5, 0.5);
                             ho_ContornoEsq.Dispose();
                             ho_ContornoEsq = ho_ContornoEsqAux.CopyObj(1, -1);
                         }
-                        //A detecção do contorno ter pontos no lado direito da ROI RectEsqXLD
-                        //não foi implementada devido à baixíssima probabilidade desse evento
-                        //------------------------------------------------------------------------------
-                        //--> DETECÇÃO DA ÁREA DOS BURACOS NA IMAGEM DO FORMADOR - LADO ESQUERDO
-                        //- Delimitando Região RectEsqXLD: Contorno até borda direita da ROI Esq
-                        HOperatorSet.GetContourXld(ho_ContornoEsq, out hv_LContEsq, out hv_CContEsq);
-                        HOperatorSet.TupleLength(hv_CContEsq, out hv_CContEsqQt);
-                        //- Teste Contorno Cortado vazio (Elimina Frame):
-                        HOperatorSet.TupleType(hv_CContEsq, out hv_VarVazia);
-                        if ((int)(new HTuple(hv_VarVazia.TupleEqual(2))) != 0)
-                        {
-                            //- Parâmetro Limitador Linhas Região Buracos (NECESSITA CALIBRAÇÃO)
-                            hv_LimLinRegBur = 40;
-                            //- Delimitando a Região:
-                            HOperatorSet.TupleFirstN(hv_LContEsq, hv_CContEsqQt - hv_LimLinRegBur, out hv_LContEsq);
-                            HOperatorSet.TupleFirstN(hv_CContEsq, hv_CContEsqQt - hv_LimLinRegBur, out hv_CContEsq);
-                            hv_LRegBurEsq = new HTuple();
-                            hv_LRegBurEsq = hv_LRegBurEsq.TupleConcat(hv_LContEsq);
-                            hv_LRegBurEsq = hv_LRegBurEsq.TupleConcat(hv_LContEsq.TupleSelect(
-                                hv_CContEsqQt - hv_LimLinRegBur));
-                            hv_LRegBurEsq = hv_LRegBurEsq.TupleConcat(hv_LContEsq.TupleSelect(
-                                0));
-                            hv_LRegBurEsq = hv_LRegBurEsq.TupleConcat(hv_LContEsq.TupleSelect(
-                                0));
-                            hv_CRegBurEsq = new HTuple();
-                            hv_CRegBurEsq = hv_CRegBurEsq.TupleConcat(hv_CContEsq);
-                            hv_CRegBurEsq = hv_CRegBurEsq.TupleConcat(((hv_RectEsqXLD.TupleSelect(
-                                3))).TupleReal());
-                            hv_CRegBurEsq = hv_CRegBurEsq.TupleConcat(((hv_RectEsqXLD.TupleSelect(
-                                3))).TupleReal());
-                            hv_CRegBurEsq = hv_CRegBurEsq.TupleConcat(hv_CContEsq.TupleSelect(
-                                0));
-                            //- Gerando a região:
-                            ho_ContRegBurEsq.Dispose();
-                            HOperatorSet.GenRegionPolygon(out ho_ContRegBurEsq, hv_LRegBurEsq, hv_CRegBurEsq);
-                            //- Preenchendo a região:
-                            ho_DomRegBurEsq.Dispose();
-                            HOperatorSet.FillUp(ho_ContRegBurEsq, out ho_DomRegBurEsq);
-                            ho_RegBurEsq.Dispose();
-                            HOperatorSet.ReduceDomain(ho_RegionEsq, ho_DomRegBurEsq, out ho_RegBurEsq
-                                );
-                            //- Gerando Imagem Apenas com Buracos:
-                            ho_BurEsq.Dispose();
-                            HOperatorSet.Difference(ho_DomRegBurEsq, ho_RegBurEsq, out ho_BurEsq);
-                            //- Gerando região conexa com Image dos Buracos:
-                            ho_BurEsqCon.Dispose();
-                            HOperatorSet.Connection(ho_BurEsq, out ho_BurEsqCon);
-                            //- Contanto Número de Buracos:
-                            HOperatorSet.CountObj(ho_BurEsqCon, out hv_NBEsq);
-                            //- Calculando área Região Apenas com Buracos:
-                            HOperatorSet.AreaCenter(ho_BurEsq, out hv_Area1E, out hv_AuxL, out hv_AuxC);
-                            //- Calculando área Buracos ROI:
-                            HOperatorSet.AreaHoles(ho_RegBurEsq, out hv_Area2E);
-                            //- PDI Região Esquerda realizdo:
-                            hv_PdiEsqAreaBur = 1;
-                        }
-                        else if ((int)(new HTuple(hv_VarVazia.TupleEqual(15))) != 0)
-                        {
-                            hv_PdiEsqAreaBur = 0;
-                        }
-                        //------------------------------------------------------------------------------
-                    }
-                    else
-                    {
-                        hv_PdiEsqAreaBur = 0;
-                    }
-                    //- FIM ANALISE AREA / NUMERO BURADOS RectEsqXLD
-                    //==========================================================================
-
-
-
-
-
-
-
-
-
-                    //Fim do código para identificação da maior dentre as bordas identificadas do lado esquerdo
-                    ho_SmoothedContoursESQ.Dispose();
-                    HOperatorSet.SmoothContoursXld(ho_ContornoEsq, out ho_SmoothedContoursESQ,
-                      7);
-                    HOperatorSet.SetColor(hv_ExpDefaultWinHandle, "red");
-                    HOperatorSet.SetLineWidth(hv_ExpDefaultWinHandle, 2);
-                    HOperatorSet.DispObj(ho_SmoothedContoursESQ, hv_ExpDefaultWinHandle);
-
-                    //Calcula a regressão linear para o contorno à esquerda
-                    ho_RegressContoursESQ.Dispose();
-                    HOperatorSet.RegressContoursXld(ho_SmoothedContoursESQ, out ho_RegressContoursESQ, "no", 1);
-                    HOperatorSet.GetRegressParamsXld(ho_RegressContoursESQ, out hv_Length, out hv_Nx, out hv_Ny, out hv_Dist, out hv_Fpx, out hv_Fpy, out hv_Lpx, out hv_Lpy, out hv_Mean, out hv_Deviation);
-                    HOperatorSet.SetColor(hv_ExpDefaultWinHandle, "green");
-                    HOperatorSet.DispArrow(hv_ExpDefaultWinHandle, hv_Fpy, hv_Fpx, hv_Lpy, hv_Lpx, 1);
-
-                    //Calcula a orientação da regressão linear à esquerda e rotaciona o contorno até 90°
-                    HOperatorSet.LineOrientation(hv_Fpy, hv_Fpx, hv_Lpy, hv_Lpx, out hv_PhiEsq);
-                    ho_Line.Dispose();
-                    HOperatorSet.GenContourPolygonXld(out ho_Line, hv_Fpy.TupleConcat(hv_Lpy),
-                      hv_Fpx.TupleConcat(hv_Lpx));
-                    HOperatorSet.DispObj(ho_Line, hv_ExpDefaultWinHandle);
-                    hv_RotacaoEsq = -hv_PhiEsq;
-                    //1.57-PhiEsq
-
-                    HOperatorSet.HomMat2dIdentity(out hv_HomMat2DIdentity);
-                    HOperatorSet.HomMat2dRotate(hv_HomMat2DIdentity, hv_RotacaoEsq, hv_Fpy, hv_Fpx,
-                      out hv_HomMat2DRotate);
-                    ho_ContoursAffineTrans.Dispose();
-                    HOperatorSet.AffineTransContourXld(ho_RegressContoursESQ, out ho_ContoursAffineTrans,
-                      hv_HomMat2DRotate);
-                    HOperatorSet.DispObj(ho_ContoursAffineTrans, hv_ExpDefaultWinHandle);
-                    HOperatorSet.GetContourXld(ho_ContoursAffineTrans, out hv_Row, out hv_Col);
-
-
-
-                    //for index := 0 to |Row|-1 by 1
-                    //fwrite_string (arquivoSaida1, [Col[index],' ' ,Row[index]])
-                    //fnew_line (arquivoSaida1)
-                    //endfor
-
-                    //close_file (arquivoSaida1)
-
-                    //***************************************************************************************************************
-                    //TRATAMENTO DA IMAGEM A DIREITA
-
-                    //HOperatorSet.OpenFile("bordaNota7_algumasEspirasSalientes_15_12_7h20_bordaDireita", "output", out hv_arquivoSaida1);
-                    //open_file ('bordaNota7_algumasEspirasSalientesEMuitoDesorganizadas_14_12_6h24_bordaDireita', 'output', arquivoSaida1)
-                    //open_file ('bordaNota6_algumasEspirasSalientesEMuitoDesorganizadas_15_12_10h03_bordaDireita', 'output', arquivoSaida1)
-                    //open_file ('bordaNota6_algumasEspirasSalientesEMuitoDesorganizadas_15_12_10h03_bordaDireita', 'output', arquivoSaida1)
-                    //open_file ('bordaNota4_algumasEspirasSalientesEMuitoDesorganizadas_15_12_12h11_bordaDireita', 'output', arquivoSaida1)
-                    //open_file ('bordaNota4_algumasEspirasSalientesEDeslocamentoRegiãoEspiras_14_12_7h39_bordaDireita', 'output', arquivoSaida1)
-                    //open_file ('bordaNota3_algumasEspirasSalientesEMuitoDesorganizadas_14_12_23h29_bordaDireita', 'output', arquivoSaida1)
-                    ho_ImageReducedDir.Dispose();
-                    HOperatorSet.ReduceDomain(ho_Image, ho_RectangleDir, out ho_ImageReducedDir
-                      );
-                    ho_GrayImageDir.Dispose();
-                    HOperatorSet.Rgb1ToGray(ho_ImageReducedDir, out ho_GrayImageDir);
-                    ho_ImageEmphasizeDir.Dispose();
-                    HOperatorSet.Emphasize(ho_GrayImageDir, out ho_ImageEmphasizeDir, 7, 7, 0.2);
-
-                    //Filtro de cinza
-                    //dev_set_color ('black')
-                    ho_RegionDir.Dispose();
-                    HOperatorSet.Threshold(ho_GrayImageDir, out ho_RegionDir, 140, 255);
-
-                    //Gera um contorno XLD da região direita
-                    ho_ContoursDir.Dispose();
-                    HOperatorSet.GenContourRegionXld(ho_RegionDir, out ho_ContoursDir, "center");
-
-                    //Separa o contorno da região à direita e o filtra por comprimento
-                    //dev_set_color ('white')
-                    ho_FullRightContour.Dispose();
-                    HOperatorSet.ClipContoursXld(ho_ContoursDir, out ho_FullRightContour, hv_RectDirXLD.TupleSelect(
-                      0), hv_RectDirXLD.TupleSelect(1), hv_RectDirXLD.TupleSelect(2), hv_RectDirXLD.TupleSelect(
-                      3));
-                    ho_ContornoDir.Dispose();
-                    HOperatorSet.SelectContoursXld(ho_FullRightContour, out ho_ContornoDir, "contour_length",
-                      70, 3000, -0.5, 0.5);
-
-                    //Código para selecionar a maior dentre as bordas identificadas do lado direito
-                    hv_ContornoDirMax = 0;
-                    HOperatorSet.LengthXld(ho_ContornoDir, out hv_comprimentosBordaDireita);
-                    HOperatorSet.TupleLength(hv_comprimentosBordaDireita, out hv_tamanhoVetorBordasDireita);
-                    if ((int)(new HTuple(hv_tamanhoVetorBordasDireita.TupleEqual(0))) != 0)
-                    {
-                        hv_ContornoDirMax = hv_ContornoDirMax;
-                    }
-                    //hv_i = hv_comprimentosBordaDireita.TupleSelect(0);
-                    if ((int)(new HTuple(hv_tamanhoVetorBordasDireita.TupleGreater(0))) != 0)
-                    {
-                        HTuple end_val176 = hv_tamanhoVetorBordasDireita - 1;
-                        HTuple step_val176 = 1;
-                        for (hv_index = 0; hv_index.Continue(end_val176, step_val176); hv_index = hv_index.TupleAdd(step_val176))
-                        {
-                            if ((int)(new HTuple(((hv_comprimentosBordaDireita.TupleSelect(hv_index))).TupleGreater(
-                             hv_ContornoDirMax))) != 0)
-                            {
-                                hv_indexMaiorContorno = hv_index.Clone();
-                                hv_ContornoDirMax = hv_comprimentosBordaDireita.TupleSelect(hv_index);
-                            }
-                        }
-                        //ho_ContornoDirAux.Dispose();
-                        HOperatorSet.SelectContoursXld(ho_ContornoDir, out ho_ContornoDirAux, "contour_length",
-                            hv_ContornoDirMax, 3000, -0.5, 0.5);
-                        if (ho_ContornoDirAux != null)
-                            ho_ContornoDir.Dispose();
-                        ho_ContornoDir = ho_ContornoDirAux.CopyObj(1, -1);
 
 
 
                         //==========================================================================
-                        //-------------------------------------------------------------------------
-                        //--> AJUSTE DO CONTORNO (ELIMINAR PONTOS = AO LADO DIREITO DA RectDirXLD):
+                        //--> AJUSTE DO CONTORNO (ELIMINAR PONTOS = AO LADO ESQUERDO DA RectEsqXLD):
                         //- Indices dos pontos do contorno:
-                        HOperatorSet.GetContourXld(ho_ContornoDir, out hv_LContDir, out hv_CContDir);
-                        //- Teste Contorno <ContornoDir> Vazio:
-                        HOperatorSet.TupleType(hv_LContDir, out hv_VarVazia);
+                        HOperatorSet.GetContourXld(ho_ContornoEsq, out hv_LContEsq, out hv_CContEsq);
+                        //- Teste Contorno <ContornoEsq> Vazio:
+                        HOperatorSet.TupleType(hv_LContEsq, out hv_VarVazia);
                         if ((int)(new HTuple(hv_VarVazia.TupleEqual(15))) != 0)
                         {
-                            //LContEsq[0] := -1
-                            hv_PdiEsqAreBur = 0;
+                            if (hv_LContEsq == null)
+                                hv_LContEsq = new HTuple();
+                            hv_LContEsq[0] = -1;
                         }
                         else if ((int)(new HTuple(hv_VarVazia.TupleEqual(2))) != 0)
                         {
                             //- Quantidade de índices de Coluna do Contorno:
-                            HOperatorSet.TupleLength(hv_CContDir, out hv_CContDirQt);
+                            HOperatorSet.TupleLength(hv_CContEsq, out hv_CContEsqQt);
                             //- Quantidade de índices de Linhas do Contorno:
-                            HOperatorSet.TupleLength(hv_LContDir, out hv_LContDirQt);
+                            HOperatorSet.TupleLength(hv_LContEsq, out hv_LContEsqQt);
                         }
-                        if ((int)(new HTuple(hv_PdiEsqAreaBur.TupleEqual(1))) != 0)
+                        if ((int)(new HTuple(((hv_LContEsq.TupleSelect(0))).TupleEqual(hv_RectEsqXLD.TupleSelect(
+                            2)))) != 0)
                         {
-                            //*         if (LContDir[LContDirQt-1] == RectDirXLD[2])
                             //- Cálculo 25% Qt Colunas do Contorno:
-                            HOperatorSet.TupleCeil(hv_CContDirQt * 0.25, out hv_DetLimAval);
+                            HOperatorSet.TupleCeil(hv_CContEsqQt * 0.90, out hv_DetLimAval);
                             //- Separa 25% Índices Contorno
-                            HOperatorSet.TupleLastN(hv_CContDir, hv_DetLimAval, out hv_CContDirFN);
-                            //- Verifica Qt Índices do TRECHO DO Contorno com = valor de coluna Dir da RectDirXLD
-                            HOperatorSet.TupleFind(hv_CContDirFN, hv_RectDirXLD.TupleSelect(3), out hv_IndColDir);
-                            HOperatorSet.TupleSum(hv_IndColDir, out hv_SIndColDir);
-                            HOperatorSet.TupleLength(hv_IndColDir, out hv_QtIndColDir);
-                            //- Se há índices Col Dir Contorno = Col RectDirXLD
-                            if ((int)(new HTuple(hv_SIndColDir.TupleGreaterEqual(0))) != 0)
+                            HOperatorSet.TupleFirstN(hv_CContEsq, hv_DetLimAval, out hv_CContEsqFN);
+                            //- Verifica Qt Índices do TRECHO DO Contorno com = valor de coluna Dir da RectEsqXLD
+                            HOperatorSet.TupleFind(hv_CContEsqFN, hv_RectEsqXLD.TupleSelect(1), out hv_IndColEsq);
+                            HOperatorSet.TupleSum(hv_IndColEsq, out hv_SIndColEsq);
+                            HOperatorSet.TupleLength(hv_IndColEsq, out hv_QtIndColEsq);
+                            //- Se há índices Col Esq Contorno = Col RectEsqXLD
+                            if ((int)(new HTuple(hv_SIndColEsq.TupleGreaterEqual(0))) != 0)
                             {
-                                //- Porcentagem Qtde índices Col Dir Coincidentes
-                                hv_DetLimDir = ((hv_QtIndColDir.TupleReal()) / (hv_DetLimAval.TupleReal()
+                                //- Porcentagem Qtde índices Col Esq Coincidentes
+                                hv_DetLimEsq = ((hv_QtIndColEsq.TupleReal()) / (hv_DetLimAval.TupleReal()
                                     )) * 100;
-                                //- Se não há índices Col Dir Contorno = Col Dir RectDirXLD
+                                //- Se não há índices Col Esq Contorno = Col Esq RectEsqXLD
                             }
-                            else if ((int)(new HTuple(hv_SIndColDir.TupleLess(0))) != 0)
+                            else if ((int)(new HTuple(hv_SIndColEsq.TupleLess(0))) != 0)
                             {
-                                //- Não há índices Col Dir Coincidentes
-                                hv_DetLimDir = -1;
+                                //- Não há índices Col Esq Coincidentes
+                                hv_DetLimEsq = -1;
                             }
                             //- Se a quantidade de índices coincidentes > 20%
-                            if ((int)(new HTuple(hv_DetLimDir.TupleGreater(20))) != 0)
+                            if ((int)(new HTuple(hv_DetLimEsq.TupleGreater(20))) != 0)
                             {
                                 hv_VarTamObj = 100;
-                                ho_ContornoDirRed.Dispose();
-                                HOperatorSet.ClipContoursXld(ho_ContornoDir, out ho_ContornoDirRed, hv_RectDirXLD.TupleSelect(
-                                    0), hv_RectDirXLD.TupleSelect(1), (hv_RectDirXLD.TupleSelect(2)) - hv_QtIndColDir,
-                                    hv_CContDir.TupleSelect((hv_CContDirQt - hv_QtIndColDir) - 1));
-                                ho_ContornoDirAux.Dispose();
-                                HOperatorSet.SelectContoursXld(ho_ContornoDirRed, out ho_ContornoDirAux,
-                                    "open", 100, 3000, -0.5, 0.5);
-                                //- Verifica Qtde Objetos em <ContornoDirAux>:
-                                HOperatorSet.CountObj(ho_ContornoDirAux, out hv_VarNumObj);
+                                ho_ContornoEsqRed.Dispose();
+                                HOperatorSet.ClipContoursXld(ho_ContornoEsq, out ho_ContornoEsqRed, hv_RectEsqXLD.TupleSelect(
+                                    0), hv_RectEsqXLD.TupleSelect(1), hv_LContEsq.TupleSelect(hv_QtIndColEsq - 1),
+                                    hv_RectEsqXLD.TupleSelect(3));
+                                ho_ContornoEsqAux.Dispose();
+                                HOperatorSet.SelectContoursXld(ho_ContornoEsqRed, out ho_ContornoEsqAux,
+                                    "open", hv_VarTamObj, 3000, -0.5, 0.5);
+                                //- Verifica Qtde Objetos em <ContornoEsqAux>:
+                                HOperatorSet.CountObj(ho_ContornoEsqAux, out hv_VarNumObj);
                                 //- Altera a Seleção para Manter o Objeto Maior:
                                 while ((int)(new HTuple(hv_VarNumObj.TupleGreater(1))) != 0)
                                 {
                                     hv_VarTamObj = hv_VarTamObj + 1;
-                                    ho_ContornoDirAux.Dispose();
-                                    HOperatorSet.SelectContoursXld(ho_ContornoDirRed, out ho_ContornoDirAux,
+                                    ho_ContornoEsqAux.Dispose();
+                                    HOperatorSet.SelectContoursXld(ho_ContornoEsqRed, out ho_ContornoEsqAux,
                                         "open", hv_VarTamObj, 3000, -0.5, 0.5);
-                                    HOperatorSet.CountObj(ho_ContornoDirAux, out hv_VarNumObj);
+                                    HOperatorSet.CountObj(ho_ContornoEsqAux, out hv_VarNumObj);
                                 }
-                                ho_ContornoDir.Dispose();
-                                ho_ContornoDir = ho_ContornoDirRed.CopyObj(1, -1);
+                                ho_ContornoEsq.Dispose();
+                                ho_ContornoEsq = ho_ContornoEsqAux.CopyObj(1, -1);
                             }
-                            //A detecção do contorno ter pontos no lado esquerdo da ROI RectDirXLD
-                            //não foi implementada devido a baixíssima probabilidade desse evento.
+                            //A detecção do contorno ter pontos no lado direito da ROI RectEsqXLD
+                            //não foi implementada devido à baixíssima probabilidade desse evento
                             //------------------------------------------------------------------------------
-                            //--> DETECÇÃO DA ÁREA DOS BURACOS NA IMAGEM DO FORMADOR - LADO DIREITO
-                            //- Delimitando Região RectDirXLD: Contorno até borda Esquerda da ROI Dir
-                            HOperatorSet.GetContourXld(ho_ContornoDir, out hv_LContDir, out hv_CContDir);
-                            HOperatorSet.TupleType(hv_CContDir, out hv_VarVazia);
+                            //--> DETECÇÃO DA ÁREA DOS BURACOS NA IMAGEM DO FORMADOR - LADO ESQUERDO
+                            //- Delimitando Região RectEsqXLD: Contorno até borda direita da ROI Esq
+                            HOperatorSet.GetContourXld(ho_ContornoEsq, out hv_LContEsq, out hv_CContEsq);
+                            HOperatorSet.TupleLength(hv_CContEsq, out hv_CContEsqQt);
+                            //- Teste Contorno Cortado vazio (Elimina Frame):
+                            HOperatorSet.TupleType(hv_CContEsq, out hv_VarVazia);
                             if ((int)(new HTuple(hv_VarVazia.TupleEqual(2))) != 0)
                             {
                                 //- Parâmetro Limitador Linhas Região Buracos (NECESSITA CALIBRAÇÃO)
-                                hv_LimLinRegBurDir = 40;
-                                //- Delimitando a região:
-                                HOperatorSet.TupleLastN(hv_LContDir, hv_LimLinRegBurDir, out hv_LContDir);
-                                HOperatorSet.TupleLastN(hv_CContDir, hv_LimLinRegBurDir, out hv_CContDir);
-                                hv_LRegBurDir = new HTuple();
-                                hv_LRegBurDir = hv_LRegBurDir.TupleConcat(hv_LContDir);
-                                hv_LRegBurDir = hv_LRegBurDir.TupleConcat(((hv_RectDirXLD.TupleSelect(
-                                    2))).TupleReal());
-                                hv_LRegBurDir = hv_LRegBurDir.TupleConcat(hv_LContDir.TupleSelect(
+                                hv_LimLinRegBur = 40;
+                                //- Delimitando a Região:
+                                HOperatorSet.TupleFirstN(hv_LContEsq, hv_CContEsqQt - hv_LimLinRegBur, out hv_LContEsq);
+                                HOperatorSet.TupleFirstN(hv_CContEsq, hv_CContEsqQt - hv_LimLinRegBur, out hv_CContEsq);
+                                hv_LRegBurEsq = new HTuple();
+                                hv_LRegBurEsq = hv_LRegBurEsq.TupleConcat(hv_LContEsq);
+                                hv_LRegBurEsq = hv_LRegBurEsq.TupleConcat(hv_LContEsq.TupleSelect(
+                                    hv_CContEsqQt - hv_LimLinRegBur));
+                                hv_LRegBurEsq = hv_LRegBurEsq.TupleConcat(hv_LContEsq.TupleSelect(
                                     0));
-                                hv_LRegBurDir = hv_LRegBurDir.TupleConcat(hv_LContDir.TupleSelect(
+                                hv_LRegBurEsq = hv_LRegBurEsq.TupleConcat(hv_LContEsq.TupleSelect(
                                     0));
-                                hv_CRegBurDir = new HTuple();
-                                hv_CRegBurDir = hv_CRegBurDir.TupleConcat(hv_CContDir);
-                                hv_CRegBurDir = hv_CRegBurDir.TupleConcat(((hv_RectDirXLD.TupleSelect(
-                                    1))).TupleReal());
-                                hv_CRegBurDir = hv_CRegBurDir.TupleConcat(((hv_RectDirXLD.TupleSelect(
-                                    1))).TupleReal());
-                                hv_CRegBurDir = hv_CRegBurDir.TupleConcat(hv_CContDir.TupleSelect(
+                                hv_CRegBurEsq = new HTuple();
+                                hv_CRegBurEsq = hv_CRegBurEsq.TupleConcat(hv_CContEsq);
+                                hv_CRegBurEsq = hv_CRegBurEsq.TupleConcat(((hv_RectEsqXLD.TupleSelect(
+                                    3))).TupleReal());
+                                hv_CRegBurEsq = hv_CRegBurEsq.TupleConcat(((hv_RectEsqXLD.TupleSelect(
+                                    3))).TupleReal());
+                                hv_CRegBurEsq = hv_CRegBurEsq.TupleConcat(hv_CContEsq.TupleSelect(
                                     0));
-                                //- Gerando nova região:
-                                ho_ContRegBurDir.Dispose();
-                                HOperatorSet.GenRegionPolygon(out ho_ContRegBurDir, hv_LRegBurDir, hv_CRegBurDir);
+                                //- Gerando a região:
+                                ho_ContRegBurEsq.Dispose();
+                                HOperatorSet.GenRegionPolygon(out ho_ContRegBurEsq, hv_LRegBurEsq, hv_CRegBurEsq);
                                 //- Preenchendo a região:
-                                ho_DomRegBurDir.Dispose();
-                                HOperatorSet.FillUp(ho_ContRegBurDir, out ho_DomRegBurDir);
-                                ho_RegBurDir.Dispose();
-                                HOperatorSet.ReduceDomain(ho_RegionDir, ho_DomRegBurDir, out ho_RegBurDir
+                                ho_DomRegBurEsq.Dispose();
+                                HOperatorSet.FillUp(ho_ContRegBurEsq, out ho_DomRegBurEsq);
+                                ho_RegBurEsq.Dispose();
+                                HOperatorSet.ReduceDomain(ho_RegionEsq, ho_DomRegBurEsq, out ho_RegBurEsq
                                     );
                                 //- Gerando Imagem Apenas com Buracos:
-                                ho_BurDir.Dispose();
-                                HOperatorSet.Difference(ho_DomRegBurDir, ho_RegBurDir, out ho_BurDir);
+                                ho_BurEsq.Dispose();
+                                HOperatorSet.Difference(ho_DomRegBurEsq, ho_RegBurEsq, out ho_BurEsq);
                                 //- Gerando região conexa com Image dos Buracos:
-                                ho_BurDirCon.Dispose();
-                                HOperatorSet.Connection(ho_BurDir, out ho_BurDirCon);
+                                ho_BurEsqCon.Dispose();
+                                HOperatorSet.Connection(ho_BurEsq, out ho_BurEsqCon);
                                 //- Contanto Número de Buracos:
-                                HOperatorSet.CountObj(ho_BurDirCon, out hv_NBDir);
+                                HOperatorSet.CountObj(ho_BurEsqCon, out hv_NBEsq);
                                 //- Calculando área Região Apenas com Buracos:
-                                HOperatorSet.AreaCenter(ho_BurDir, out hv_Area1D, out hv_AuxL, out hv_AuxC);
+                                HOperatorSet.AreaCenter(ho_BurEsq, out hv_Area1E, out hv_AuxL, out hv_AuxC);
                                 //- Calculando área Buracos ROI:
-                                HOperatorSet.AreaHoles(ho_RegBurDir, out hv_Area2D);
-                                //- PDI Região Direita Realizado:
-                                hv_PdiDirAreaBur = 1;
+                                HOperatorSet.AreaHoles(ho_RegBurEsq, out hv_Area2E);
+                                //- PDI Região Esquerda realizdo:
+                                hv_PdiEsqAreaBur = 1;
                             }
                             else if ((int)(new HTuple(hv_VarVazia.TupleEqual(15))) != 0)
                             {
-                                hv_PdiDirAreaBur = 0;
+                                hv_PdiEsqAreaBur = 0;
                             }
                             //------------------------------------------------------------------------------
                         }
                         else
                         {
-                            hv_PdiDirAreaBur = 0;
+                            hv_PdiEsqAreaBur = 0;
                         }
-                        //- FIM ANALISE AREA / NUMERO BURADOS RectDirXLD
+                        //- FIM ANALISE AREA / NUMERO BURADOS RectEsqXLD
                         //==========================================================================
 
 
@@ -1019,108 +772,361 @@ public partial class HDevelopExport
 
 
 
-                        //Fim do código para identificação da maior dentre as bordas identificadas do lado direito
-                        ho_SmoothedContoursDIR.Dispose();
-                        HOperatorSet.SmoothContoursXld(ho_ContornoDir, out ho_SmoothedContoursDIR,
+
+
+                        //Fim do código para identificação da maior dentre as bordas identificadas do lado esquerdo
+                        ho_SmoothedContoursESQ.Dispose();
+                        HOperatorSet.SmoothContoursXld(ho_ContornoEsq, out ho_SmoothedContoursESQ,
                           7);
-                        //dev_set_color ('red')
-                        //dev_display (SmoothedContoursDIR)
+                        HOperatorSet.SetColor(hv_ExpDefaultWinHandle, "red");
+                        HOperatorSet.SetLineWidth(hv_ExpDefaultWinHandle, 2);
+                        HOperatorSet.DispObj(ho_SmoothedContoursESQ, hv_ExpDefaultWinHandle);
 
-                        //Calcula a regressão linear  para o contorno à direita
-                        ho_RegressContoursDIR.Dispose();
-                        HOperatorSet.RegressContoursXld(ho_SmoothedContoursDIR, out ho_RegressContoursDIR,
-                        "no", 1);
-                        HOperatorSet.GetRegressParamsXld(ho_RegressContoursDIR, out hv_Length1, out hv_Nx1,
-                          out hv_Ny1, out hv_Dist1, out hv_Fpx1, out hv_Fpy1, out hv_Lpx1, out hv_Lpy1,
-                          out hv_Mean1, out hv_Deviation1);
-                        //dev_set_color ('green')
-                        //disp_arrow (200000, Fpy1, Fpx1, Lpy1, Lpx1, 1)
+                        //Calcula a regressão linear para o contorno à esquerda
+                        ho_RegressContoursESQ.Dispose();
+                        HOperatorSet.RegressContoursXld(ho_SmoothedContoursESQ, out ho_RegressContoursESQ, "no", 1);
+                        HOperatorSet.GetRegressParamsXld(ho_RegressContoursESQ, out hv_Length, out hv_Nx, out hv_Ny, out hv_Dist, out hv_Fpx, out hv_Fpy, out hv_Lpx, out hv_Lpy, out hv_Mean, out hv_Deviation);
+                        HOperatorSet.SetColor(hv_ExpDefaultWinHandle, "green");
+                        HOperatorSet.DispArrow(hv_ExpDefaultWinHandle, hv_Fpy, hv_Fpx, hv_Lpy, hv_Lpx, 1);
 
-                        //Calcula a orientação da regressão linear à direita e rotaciona o contorno até -90°
-                        HOperatorSet.LineOrientation(hv_Fpy1, hv_Fpx1, hv_Lpy1, hv_Lpx1, out hv_PhiDir);
-                        hv_RotacaoDir = -hv_PhiDir;
-                        //1.57-PhiDir
+                        //Calcula a orientação da regressão linear à esquerda e rotaciona o contorno até 90°
+                        HOperatorSet.LineOrientation(hv_Fpy, hv_Fpx, hv_Lpy, hv_Lpx, out hv_PhiEsq);
+                        ho_Line.Dispose();
+                        HOperatorSet.GenContourPolygonXld(out ho_Line, hv_Fpy.TupleConcat(hv_Lpy),
+                          hv_Fpx.TupleConcat(hv_Lpx));
+                        HOperatorSet.DispObj(ho_Line, hv_ExpDefaultWinHandle);
+                        hv_RotacaoEsq = -hv_PhiEsq;
+                        //1.57-PhiEsq
 
-                        HOperatorSet.HomMat2dIdentity(out hv_HomMat2DIdentity1);
-                        HOperatorSet.HomMat2dRotate(hv_HomMat2DIdentity1, hv_RotacaoDir, hv_Fpy1, hv_Fpx1,
-                          out hv_HomMat2DRotate1);
-                        ho_ContoursAffineTrans1.Dispose();
-                        HOperatorSet.AffineTransContourXld(ho_RegressContoursDIR, out ho_ContoursAffineTrans1,
-                          hv_HomMat2DRotate1);
-                        //dev_display (ContoursAffineTrans1)
-                        HOperatorSet.GetContourXld(ho_ContoursAffineTrans1, out hv_Row1, out hv_Col1);
+                        HOperatorSet.HomMat2dIdentity(out hv_HomMat2DIdentity);
+                        HOperatorSet.HomMat2dRotate(hv_HomMat2DIdentity, hv_RotacaoEsq, hv_Fpy, hv_Fpx,
+                          out hv_HomMat2DRotate);
+                        ho_ContoursAffineTrans.Dispose();
+                        HOperatorSet.AffineTransContourXld(ho_RegressContoursESQ, out ho_ContoursAffineTrans,
+                          hv_HomMat2DRotate);
+                        HOperatorSet.DispObj(ho_ContoursAffineTrans, hv_ExpDefaultWinHandle);
+                        HOperatorSet.GetContourXld(ho_ContoursAffineTrans, out hv_Row, out hv_Col);
 
 
 
+                        //for index := 0 to |Row|-1 by 1
+                        //fwrite_string (arquivoSaida1, [Col[index],' ' ,Row[index]])
+                        //fnew_line (arquivoSaida1)
+                        //endfor
 
-                        //==========================================================================
-                        //--> CÁLCULO DA NOTA PELA MÉDIA GERAL DAS ÁREAS
-                        if ((int)(new HTuple(((hv_PdiEsqAreaBur + hv_PdiDirAreaBur)).TupleEqual(2))) != 0)
+                        //close_file (arquivoSaida1)
+
+                        //***************************************************************************************************************
+                        //TRATAMENTO DA IMAGEM A DIREITA
+
+                        //HOperatorSet.OpenFile("bordaNota7_algumasEspirasSalientes_15_12_7h20_bordaDireita", "output", out hv_arquivoSaida1);
+                        //open_file ('bordaNota7_algumasEspirasSalientesEMuitoDesorganizadas_14_12_6h24_bordaDireita', 'output', arquivoSaida1)
+                        //open_file ('bordaNota6_algumasEspirasSalientesEMuitoDesorganizadas_15_12_10h03_bordaDireita', 'output', arquivoSaida1)
+                        //open_file ('bordaNota6_algumasEspirasSalientesEMuitoDesorganizadas_15_12_10h03_bordaDireita', 'output', arquivoSaida1)
+                        //open_file ('bordaNota4_algumasEspirasSalientesEMuitoDesorganizadas_15_12_12h11_bordaDireita', 'output', arquivoSaida1)
+                        //open_file ('bordaNota4_algumasEspirasSalientesEDeslocamentoRegiãoEspiras_14_12_7h39_bordaDireita', 'output', arquivoSaida1)
+                        //open_file ('bordaNota3_algumasEspirasSalientesEMuitoDesorganizadas_14_12_23h29_bordaDireita', 'output', arquivoSaida1)
+                        ho_ImageReducedDir.Dispose();
+                        HOperatorSet.ReduceDomain(ho_Image, ho_RectangleDir, out ho_ImageReducedDir
+                          );
+                        ho_GrayImageDir.Dispose();
+                        HOperatorSet.Rgb1ToGray(ho_ImageReducedDir, out ho_GrayImageDir);
+                        ho_ImageEmphasizeDir.Dispose();
+                        HOperatorSet.Emphasize(ho_GrayImageDir, out ho_ImageEmphasizeDir, 7, 7, 0.2);
+
+                        //Filtro de cinza
+                        //dev_set_color ('black')
+                        ho_RegionDir.Dispose();
+                        HOperatorSet.Threshold(ho_GrayImageDir, out ho_RegionDir, 140, 255);
+
+                        //Gera um contorno XLD da região direita
+                        ho_ContoursDir.Dispose();
+                        HOperatorSet.GenContourRegionXld(ho_RegionDir, out ho_ContoursDir, "center");
+
+                        //Separa o contorno da região à direita e o filtra por comprimento
+                        //dev_set_color ('white')
+                        ho_FullRightContour.Dispose();
+                        HOperatorSet.ClipContoursXld(ho_ContoursDir, out ho_FullRightContour, hv_RectDirXLD.TupleSelect(
+                          0), hv_RectDirXLD.TupleSelect(1), hv_RectDirXLD.TupleSelect(2), hv_RectDirXLD.TupleSelect(
+                          3));
+                        ho_ContornoDir.Dispose();
+                        HOperatorSet.SelectContoursXld(ho_FullRightContour, out ho_ContornoDir, "contour_length",
+                          70, 3000, -0.5, 0.5);
+
+                        //Código para selecionar a maior dentre as bordas identificadas do lado direito
+                        hv_ContornoDirMax = 0;
+                        HOperatorSet.LengthXld(ho_ContornoDir, out hv_comprimentosBordaDireita);
+                        HOperatorSet.TupleLength(hv_comprimentosBordaDireita, out hv_tamanhoVetorBordasDireita);
+                        if ((int)(new HTuple(hv_tamanhoVetorBordasDireita.TupleEqual(0))) != 0)
                         {
-                            //- CONTADOR FRAME PROCESSADOS ANÁLISE AREA/NUMERO BURACOS:
-                            hv_NumAreaBur = hv_NumAreaBur + 1;
-                            //- CÁLCULO DA VARIÂNCIA LINHAS CONTORNO APÓS TRANSFORMAÇÃO AFIM:
-                            HOperatorSet.TupleType(hv_Row, out hv_VarVazia);
+                            hv_ContornoDirMax = hv_ContornoDirMax;
+                        }
+                        //hv_i = hv_comprimentosBordaDireita.TupleSelect(0);
+                        if ((int)(new HTuple(hv_tamanhoVetorBordasDireita.TupleGreater(0))) != 0)
+                        {
+                            HTuple end_val176 = hv_tamanhoVetorBordasDireita - 1;
+                            HTuple step_val176 = 1;
+                            for (hv_index = 0; hv_index.Continue(end_val176, step_val176); hv_index = hv_index.TupleAdd(step_val176))
+                            {
+                                if ((int)(new HTuple(((hv_comprimentosBordaDireita.TupleSelect(hv_index))).TupleGreater(
+                                 hv_ContornoDirMax))) != 0)
+                                {
+                                    hv_indexMaiorContorno = hv_index.Clone();
+                                    hv_ContornoDirMax = hv_comprimentosBordaDireita.TupleSelect(hv_index);
+                                }
+                            }
+                            //ho_ContornoDirAux.Dispose();
+                            HOperatorSet.SelectContoursXld(ho_ContornoDir, out ho_ContornoDirAux, "contour_length",
+                                hv_ContornoDirMax, 3000, -0.5, 0.5);
+                            if (ho_ContornoDirAux != null)
+                                ho_ContornoDir.Dispose();
+                            ho_ContornoDir = ho_ContornoDirAux.CopyObj(1, -1);
+
+
+
+                            //==========================================================================
+                            //-------------------------------------------------------------------------
+                            //--> AJUSTE DO CONTORNO (ELIMINAR PONTOS = AO LADO DIREITO DA RectDirXLD):
+                            //- Indices dos pontos do contorno:
+                            HOperatorSet.GetContourXld(ho_ContornoDir, out hv_LContDir, out hv_CContDir);
+                            //- Teste Contorno <ContornoDir> Vazio:
+                            HOperatorSet.TupleType(hv_LContDir, out hv_VarVazia);
                             if ((int)(new HTuple(hv_VarVazia.TupleEqual(15))) != 0)
                             {
-                                hv_DesPadContEsq = -1;
+                                //LContEsq[0] := -1
+                                hv_PdiEsqAreBur = 0;
+                            }
+                            else if ((int)(new HTuple(hv_VarVazia.TupleEqual(2))) != 0)
+                            {
+                                //- Quantidade de índices de Coluna do Contorno:
+                                HOperatorSet.TupleLength(hv_CContDir, out hv_CContDirQt);
+                                //- Quantidade de índices de Linhas do Contorno:
+                                HOperatorSet.TupleLength(hv_LContDir, out hv_LContDirQt);
+                            }
+                            if ((int)(new HTuple(hv_PdiEsqAreaBur.TupleEqual(1))) != 0)
+                            {
+                                //*         if (LContDir[LContDirQt-1] == RectDirXLD[2])
+                                //- Cálculo 25% Qt Colunas do Contorno:
+                                HOperatorSet.TupleCeil(hv_CContDirQt * 0.25, out hv_DetLimAval);
+                                //- Separa 25% Índices Contorno
+                                HOperatorSet.TupleLastN(hv_CContDir, hv_DetLimAval, out hv_CContDirFN);
+                                //- Verifica Qt Índices do TRECHO DO Contorno com = valor de coluna Dir da RectDirXLD
+                                HOperatorSet.TupleFind(hv_CContDirFN, hv_RectDirXLD.TupleSelect(3), out hv_IndColDir);
+                                HOperatorSet.TupleSum(hv_IndColDir, out hv_SIndColDir);
+                                HOperatorSet.TupleLength(hv_IndColDir, out hv_QtIndColDir);
+                                //- Se há índices Col Dir Contorno = Col RectDirXLD
+                                if ((int)(new HTuple(hv_SIndColDir.TupleGreaterEqual(0))) != 0)
+                                {
+                                    //- Porcentagem Qtde índices Col Dir Coincidentes
+                                    hv_DetLimDir = ((hv_QtIndColDir.TupleReal()) / (hv_DetLimAval.TupleReal()
+                                        )) * 100;
+                                    //- Se não há índices Col Dir Contorno = Col Dir RectDirXLD
+                                }
+                                else if ((int)(new HTuple(hv_SIndColDir.TupleLess(0))) != 0)
+                                {
+                                    //- Não há índices Col Dir Coincidentes
+                                    hv_DetLimDir = -1;
+                                }
+                                //- Se a quantidade de índices coincidentes > 20%
+                                if ((int)(new HTuple(hv_DetLimDir.TupleGreater(20))) != 0)
+                                {
+                                    hv_VarTamObj = 100;
+                                    ho_ContornoDirRed.Dispose();
+                                    HOperatorSet.ClipContoursXld(ho_ContornoDir, out ho_ContornoDirRed, hv_RectDirXLD.TupleSelect(
+                                        0), hv_RectDirXLD.TupleSelect(1), (hv_RectDirXLD.TupleSelect(2)) - hv_QtIndColDir,
+                                        hv_CContDir.TupleSelect((hv_CContDirQt - hv_QtIndColDir) - 1));
+                                    ho_ContornoDirAux.Dispose();
+                                    HOperatorSet.SelectContoursXld(ho_ContornoDirRed, out ho_ContornoDirAux,
+                                        "open", 100, 3000, -0.5, 0.5);
+                                    //- Verifica Qtde Objetos em <ContornoDirAux>:
+                                    HOperatorSet.CountObj(ho_ContornoDirAux, out hv_VarNumObj);
+                                    //- Altera a Seleção para Manter o Objeto Maior:
+                                    while ((int)(new HTuple(hv_VarNumObj.TupleGreater(1))) != 0)
+                                    {
+                                        hv_VarTamObj = hv_VarTamObj + 1;
+                                        ho_ContornoDirAux.Dispose();
+                                        HOperatorSet.SelectContoursXld(ho_ContornoDirRed, out ho_ContornoDirAux,
+                                            "open", hv_VarTamObj, 3000, -0.5, 0.5);
+                                        HOperatorSet.CountObj(ho_ContornoDirAux, out hv_VarNumObj);
+                                    }
+                                    ho_ContornoDir.Dispose();
+                                    ho_ContornoDir = ho_ContornoDirRed.CopyObj(1, -1);
+                                }
+                                //A detecção do contorno ter pontos no lado esquerdo da ROI RectDirXLD
+                                //não foi implementada devido a baixíssima probabilidade desse evento.
+                                //------------------------------------------------------------------------------
+                                //--> DETECÇÃO DA ÁREA DOS BURACOS NA IMAGEM DO FORMADOR - LADO DIREITO
+                                //- Delimitando Região RectDirXLD: Contorno até borda Esquerda da ROI Dir
+                                HOperatorSet.GetContourXld(ho_ContornoDir, out hv_LContDir, out hv_CContDir);
+                                HOperatorSet.TupleType(hv_CContDir, out hv_VarVazia);
+                                if ((int)(new HTuple(hv_VarVazia.TupleEqual(2))) != 0)
+                                {
+                                    //- Parâmetro Limitador Linhas Região Buracos (NECESSITA CALIBRAÇÃO)
+                                    hv_LimLinRegBurDir = 40;
+                                    //- Delimitando a região:
+                                    HOperatorSet.TupleLastN(hv_LContDir, hv_LimLinRegBurDir, out hv_LContDir);
+                                    HOperatorSet.TupleLastN(hv_CContDir, hv_LimLinRegBurDir, out hv_CContDir);
+                                    hv_LRegBurDir = new HTuple();
+                                    hv_LRegBurDir = hv_LRegBurDir.TupleConcat(hv_LContDir);
+                                    hv_LRegBurDir = hv_LRegBurDir.TupleConcat(((hv_RectDirXLD.TupleSelect(
+                                        2))).TupleReal());
+                                    hv_LRegBurDir = hv_LRegBurDir.TupleConcat(hv_LContDir.TupleSelect(
+                                        0));
+                                    hv_LRegBurDir = hv_LRegBurDir.TupleConcat(hv_LContDir.TupleSelect(
+                                        0));
+                                    hv_CRegBurDir = new HTuple();
+                                    hv_CRegBurDir = hv_CRegBurDir.TupleConcat(hv_CContDir);
+                                    hv_CRegBurDir = hv_CRegBurDir.TupleConcat(((hv_RectDirXLD.TupleSelect(
+                                        1))).TupleReal());
+                                    hv_CRegBurDir = hv_CRegBurDir.TupleConcat(((hv_RectDirXLD.TupleSelect(
+                                        1))).TupleReal());
+                                    hv_CRegBurDir = hv_CRegBurDir.TupleConcat(hv_CContDir.TupleSelect(
+                                        0));
+                                    //- Gerando nova região:
+                                    ho_ContRegBurDir.Dispose();
+                                    HOperatorSet.GenRegionPolygon(out ho_ContRegBurDir, hv_LRegBurDir, hv_CRegBurDir);
+                                    //- Preenchendo a região:
+                                    ho_DomRegBurDir.Dispose();
+                                    HOperatorSet.FillUp(ho_ContRegBurDir, out ho_DomRegBurDir);
+                                    ho_RegBurDir.Dispose();
+                                    HOperatorSet.ReduceDomain(ho_RegionDir, ho_DomRegBurDir, out ho_RegBurDir
+                                        );
+                                    //- Gerando Imagem Apenas com Buracos:
+                                    ho_BurDir.Dispose();
+                                    HOperatorSet.Difference(ho_DomRegBurDir, ho_RegBurDir, out ho_BurDir);
+                                    //- Gerando região conexa com Image dos Buracos:
+                                    ho_BurDirCon.Dispose();
+                                    HOperatorSet.Connection(ho_BurDir, out ho_BurDirCon);
+                                    //- Contanto Número de Buracos:
+                                    HOperatorSet.CountObj(ho_BurDirCon, out hv_NBDir);
+                                    //- Calculando área Região Apenas com Buracos:
+                                    HOperatorSet.AreaCenter(ho_BurDir, out hv_Area1D, out hv_AuxL, out hv_AuxC);
+                                    //- Calculando área Buracos ROI:
+                                    HOperatorSet.AreaHoles(ho_RegBurDir, out hv_Area2D);
+                                    //- PDI Região Direita Realizado:
+                                    hv_PdiDirAreaBur = 1;
+                                }
+                                else if ((int)(new HTuple(hv_VarVazia.TupleEqual(15))) != 0)
+                                {
+                                    hv_PdiDirAreaBur = 0;
+                                }
+                                //------------------------------------------------------------------------------
                             }
                             else
                             {
-                                HOperatorSet.TupleDeviation(hv_Row, out hv_DesPadContEsq);
+                                hv_PdiDirAreaBur = 0;
                             }
-                            HOperatorSet.TupleType(hv_Row1, out hv_VarVazia);
-                            if ((int)(new HTuple(hv_VarVazia.TupleEqual(15))) != 0)
+                            //- FIM ANALISE AREA / NUMERO BURADOS RectDirXLD
+                            //==========================================================================
+
+
+
+
+
+
+
+                            //Fim do código para identificação da maior dentre as bordas identificadas do lado direito
+                            ho_SmoothedContoursDIR.Dispose();
+                            HOperatorSet.SmoothContoursXld(ho_ContornoDir, out ho_SmoothedContoursDIR,
+                              7);
+                            //dev_set_color ('red')
+                            //dev_display (SmoothedContoursDIR)
+
+                            //Calcula a regressão linear  para o contorno à direita
+                            ho_RegressContoursDIR.Dispose();
+                            HOperatorSet.RegressContoursXld(ho_SmoothedContoursDIR, out ho_RegressContoursDIR,
+                            "no", 1);
+                            HOperatorSet.GetRegressParamsXld(ho_RegressContoursDIR, out hv_Length1, out hv_Nx1,
+                              out hv_Ny1, out hv_Dist1, out hv_Fpx1, out hv_Fpy1, out hv_Lpx1, out hv_Lpy1,
+                              out hv_Mean1, out hv_Deviation1);
+                            //dev_set_color ('green')
+                            //disp_arrow (200000, Fpy1, Fpx1, Lpy1, Lpx1, 1)
+
+                            //Calcula a orientação da regressão linear à direita e rotaciona o contorno até -90°
+                            HOperatorSet.LineOrientation(hv_Fpy1, hv_Fpx1, hv_Lpy1, hv_Lpx1, out hv_PhiDir);
+                            hv_RotacaoDir = -hv_PhiDir;
+                            //1.57-PhiDir
+
+                            HOperatorSet.HomMat2dIdentity(out hv_HomMat2DIdentity1);
+                            HOperatorSet.HomMat2dRotate(hv_HomMat2DIdentity1, hv_RotacaoDir, hv_Fpy1, hv_Fpx1,
+                              out hv_HomMat2DRotate1);
+                            ho_ContoursAffineTrans1.Dispose();
+                            HOperatorSet.AffineTransContourXld(ho_RegressContoursDIR, out ho_ContoursAffineTrans1,
+                              hv_HomMat2DRotate1);
+                            //dev_display (ContoursAffineTrans1)
+                            HOperatorSet.GetContourXld(ho_ContoursAffineTrans1, out hv_Row1, out hv_Col1);
+
+
+
+
+                            //==========================================================================
+                            //--> CÁLCULO DA NOTA PELA MÉDIA GERAL DAS ÁREAS
+                            if ((int)(new HTuple(((hv_PdiEsqAreaBur + hv_PdiDirAreaBur)).TupleEqual(2))) != 0)
                             {
-                                hv_DesPadContDir = -1;
+                                //- CONTADOR FRAME PROCESSADOS ANÁLISE AREA/NUMERO BURACOS:
+                                hv_NumAreaBur = hv_NumAreaBur + 1;
+                                //- CÁLCULO DA VARIÂNCIA LINHAS CONTORNO APÓS TRANSFORMAÇÃO AFIM:
+                                HOperatorSet.TupleType(hv_Row, out hv_VarVazia);
+                                if ((int)(new HTuple(hv_VarVazia.TupleEqual(15))) != 0)
+                                {
+                                    hv_DesPadContEsq = -1;
+                                }
+                                else
+                                {
+                                    HOperatorSet.TupleDeviation(hv_Row, out hv_DesPadContEsq);
+                                }
+                                HOperatorSet.TupleType(hv_Row1, out hv_VarVazia);
+                                if ((int)(new HTuple(hv_VarVazia.TupleEqual(15))) != 0)
+                                {
+                                    hv_DesPadContDir = -1;
+                                }
+                                else
+                                {
+                                    HOperatorSet.TupleDeviation(hv_Row1, out hv_DesPadContDir);
+                                }
+                                //- ARMAZENA INFO BURACOS ROI ESQ DE CADA FRAME:
+                                hv_VetInfBurEsq = ((((hv_VetInfBurEsq.TupleConcat(hv_Area1E))).TupleConcat(
+                                    hv_Area2E))).TupleConcat(hv_NBEsq);
+                                HOperatorSet.CreateMatrix(hv_NumAreaBur, 3, hv_VetInfBurEsq, out hv_MtxInfBurEsq);
+                                //- ARMAZENA INFO BURACOS ROI DIR DE CADA FRAME:
+                                hv_VetInfBurDir = ((((hv_VetInfBurDir.TupleConcat(hv_Area1D))).TupleConcat(
+                                    hv_Area2D))).TupleConcat(hv_NBDir);
+                                HOperatorSet.CreateMatrix(hv_NumAreaBur, 3, hv_VetInfBurDir, out hv_MtxInfBurDir);
+                                //- OBTENDO AS AREAS DO FRAME DAS MATRIZES DE REGISTRO DE INFORMACAO:
+                                HOperatorSet.GetValueMatrix(hv_MtxInfBurEsq, hv_NumAreaBur - 1, 0, out hv_Area1Esq);
+                                HOperatorSet.GetValueMatrix(hv_MtxInfBurEsq, hv_NumAreaBur - 1, 1, out hv_Area2Esq);
+                                HOperatorSet.GetValueMatrix(hv_MtxInfBurDir, hv_NumAreaBur - 1, 0, out hv_Area1Dir);
+                                HOperatorSet.GetValueMatrix(hv_MtxInfBurDir, hv_NumAreaBur - 1, 1, out hv_Area2Dir);
+                                HOperatorSet.GetValueMatrix(hv_MtxInfBurEsq, hv_NumAreaBur - 1, 2, out hv_NBurEsq);
+                                HOperatorSet.GetValueMatrix(hv_MtxInfBurDir, hv_NumAreaBur - 1, 2, out hv_NBurDir);
+                                //- CALCULO DA MÉDIA GERAL DOS FRAMES:
+                                hv_MedGeral = ((((hv_Area1Esq + hv_Area2Esq) + hv_Area1Dir) + hv_Area2Dir) * 1) / 4;
+                                //- CÁLCULO DA MÉDIA DOS BURACOS DOS FRAMES E DO PESO:
+                                hv_MedNuBur = (hv_NBurEsq + hv_NBurDir) / 2;
+                                HOperatorSet.TupleExp((-hv_MedNuBur) / 150, out hv_PesoBur);
+                                hv_MedPond = hv_MedGeral * hv_PesoBur;
+                                //- APLICANDO A MÉDIA NO POLINÔMIO DE REGRESSÃO (2o GRAU):
+                                hv_NotaClaBur = (((0.000000004 * hv_MedPond) * hv_MedPond) - (0.0006 * hv_MedPond)) + 8.9401;
+                                //- SATURADOR NOTA:
+                                if ((int)(new HTuple(hv_NotaClaBur.TupleLess(0))) != 0)
+                                {
+                                    hv_NotaClaBur = 0;
+                                }
+                                else if ((int)(new HTuple(hv_NotaClaBur.TupleGreater(10))) != 0)
+                                {
+                                    hv_NotaClaBur = 10;
+                                }
                             }
                             else
                             {
-                                HOperatorSet.TupleDeviation(hv_Row1, out hv_DesPadContDir);
+                                //- CODIFICAÇÃO FRAME NÃO PROCESSADO: -1
+                                hv_MedGeral = -1;
+                                hv_MedNuBur = -1;
+                                hv_MedPond = -1;
+                                hv_NotaClaBur = -1;
                             }
-                            //- ARMAZENA INFO BURACOS ROI ESQ DE CADA FRAME:
-                            hv_VetInfBurEsq = ((((hv_VetInfBurEsq.TupleConcat(hv_Area1E))).TupleConcat(
-                                hv_Area2E))).TupleConcat(hv_NBEsq);
-                            HOperatorSet.CreateMatrix(hv_NumAreaBur, 3, hv_VetInfBurEsq, out hv_MtxInfBurEsq);
-                            //- ARMAZENA INFO BURACOS ROI DIR DE CADA FRAME:
-                            hv_VetInfBurDir = ((((hv_VetInfBurDir.TupleConcat(hv_Area1D))).TupleConcat(
-                                hv_Area2D))).TupleConcat(hv_NBDir);
-                            HOperatorSet.CreateMatrix(hv_NumAreaBur, 3, hv_VetInfBurDir, out hv_MtxInfBurDir);
-                            //- OBTENDO AS AREAS DO FRAME DAS MATRIZES DE REGISTRO DE INFORMACAO:
-                            HOperatorSet.GetValueMatrix(hv_MtxInfBurEsq, hv_NumAreaBur - 1, 0, out hv_Area1Esq);
-                            HOperatorSet.GetValueMatrix(hv_MtxInfBurEsq, hv_NumAreaBur - 1, 1, out hv_Area2Esq);
-                            HOperatorSet.GetValueMatrix(hv_MtxInfBurDir, hv_NumAreaBur - 1, 0, out hv_Area1Dir);
-                            HOperatorSet.GetValueMatrix(hv_MtxInfBurDir, hv_NumAreaBur - 1, 1, out hv_Area2Dir);
-                            HOperatorSet.GetValueMatrix(hv_MtxInfBurEsq, hv_NumAreaBur - 1, 2, out hv_NBurEsq);
-                            HOperatorSet.GetValueMatrix(hv_MtxInfBurDir, hv_NumAreaBur - 1, 2, out hv_NBurDir);
-                            //- CALCULO DA MÉDIA GERAL DOS FRAMES:
-                            hv_MedGeral = ((((hv_Area1Esq + hv_Area2Esq) + hv_Area1Dir) + hv_Area2Dir) * 1) / 4;
-                            //- CÁLCULO DA MÉDIA DOS BURACOS DOS FRAMES E DO PESO:
-                            hv_MedNuBur = (hv_NBurEsq + hv_NBurDir) / 2;
-                            HOperatorSet.TupleExp((-hv_MedNuBur) / 150, out hv_PesoBur);
-                            hv_MedPond = hv_MedGeral * hv_PesoBur;
-                            //- APLICANDO A MÉDIA NO POLINÔMIO DE REGRESSÃO (2o GRAU):
-                            hv_NotaClaBur = (((0.000000004 * hv_MedPond) * hv_MedPond) - (0.0006 * hv_MedPond)) + 8.9401;
-                            //- SATURADOR NOTA:
-                            if ((int)(new HTuple(hv_NotaClaBur.TupleLess(0))) != 0)
-                            {
-                                hv_NotaClaBur = 0;
-                            }
-                            else if ((int)(new HTuple(hv_NotaClaBur.TupleGreater(10))) != 0)
-                            {
-                                hv_NotaClaBur = 10;
-                            }
-                        }
-                        else
-                        {
-                            //- CODIFICAÇÃO FRAME NÃO PROCESSADO: -1
-                            hv_MedGeral = -1;
-                            hv_MedNuBur = -1;
-                            hv_MedPond = -1;
-                            hv_NotaClaBur = -1;
-                        }
-                        //FIM CLASSIFICADOR AREA / NUMERO BURACOS
-                        //==========================================================================
+                            //FIM CLASSIFICADOR AREA / NUMERO BURACOS
+                            //==========================================================================
 
 
 
@@ -1128,446 +1134,451 @@ public partial class HDevelopExport
 
 
 
-                        // ------------- CRIAÇÃO DO VETOR DE NÚMEROS COMPLEXOS COM AS INFORMAÇÕES DAS LINHAS(Y) DOS PONTOS DAS BORDAS --------
-                        // criação do vetor complexo com a borda direita
-                        int nPontosBordaDireita = (int)(new HTuple(hv_Row1.TupleLength()));
-                        double[] vetorBordaDireita = new double[nPontosBordaDireita];
-                        double[] vetorEixoXBordaDireita = new double[nPontosBordaDireita];
-                        for (int i = 0; i < vetorBordaDireita.Length; i++)
-                        {
-                            vetorBordaDireita[i] = new double();
-                            vetorEixoXBordaDireita[i] = new double();
-                        }
-                        for (int n = 0; n < nPontosBordaDireita; n++)
-                        {
-                            vetorBordaDireita[n] = hv_Row1.TupleSelect(n);
-                            vetorEixoXBordaDireita[n] = hv_Col1.TupleSelect(n);
-                            //indexVetores++;
-                        }
-
-                        // criação do vetor complexo com a borda esquerda
-                        int nPontosBordaEsquerda = (int)(new HTuple(hv_Row.TupleLength()));
-                        double[] vetorBordaEsquerda = new double[nPontosBordaEsquerda];
-                        double[] vetorEixoXBordaEsquerda = new double[nPontosBordaEsquerda];
-                        for (int i = 0; i < vetorBordaEsquerda.Length; i++)
-                        {
-                            vetorBordaEsquerda[i] = new double();
-                            vetorEixoXBordaEsquerda[i] = new double();
-                        }
-                        for (int n = 0; n < nPontosBordaEsquerda; n++)
-                        {
-                            vetorBordaEsquerda[n] = hv_Row.TupleSelect(n);
-                            vetorEixoXBordaEsquerda[n] = hv_Col.TupleSelect(n);
-                            //indexVetores++;
-                        }
-
-                        // ------------------CÁLCULO DA POTÊNCIA DE 2 MAIS PRÓXIMA DO NÚMERO DE PONTOS DE CADA BORDA ------------
-                        // determina a potência de 2 mais próxima do número de amostras processadas da borda DIREITA
-                        int expoente = 0;
-                        while (nPontosBordaDireita > Math.Pow(2.0, (double)expoente))
-                        {
-                            expoente++;
-                        }
-                        int diferencaPotencia2 = (int)(Math.Pow(2.0, (double)expoente)) - nPontosBordaDireita;
-                        //diferencaPotencia2 = 0;
-                        indexVetores = nPontosBordaDireita;
-
-                        // determina a potência de 2 mais próxima do número de amostras processadas da borda ESQUERDA
-                        int expoente2 = 0;
-                        while (nPontosBordaEsquerda > Math.Pow(2.0, (double)expoente2))
-                        {
-                            expoente2++;
-                        }
-                        int diferencaPotencia22 = (int)(Math.Pow(2.0, (double)expoente2)) - nPontosBordaEsquerda;
-                        //diferencaPotencia2 = 0;
-                        int indexVetores2 = nPontosBordaEsquerda;
-
-                        // ------------ CÁLCULO DAS MÉDIAS DAS COMPONENTES Y DAS BORDAS ----------------
-                        // cálculo da média da componente Y da borda DIREITA
-                        double media = 0.0;
-                        for (int n = 0; n < nPontosBordaDireita; n++)
-                        {
-                            media = media + vetorBordaDireita[n];
-                        }
-                        media = media / nPontosBordaDireita;
-                        // cálculo da média da componente Y da borda ESQUERDA
-                        double media2 = 0.0;
-                        for (int n = 0; n < nPontosBordaEsquerda; n++)
-                        {
-                            media2 = media2 + vetorBordaEsquerda[n];
-                        }
-                        media2 = media2 / nPontosBordaEsquerda;
-
-                        // ------ CRIAÇÃO DOS VETORES DAS BORDAS COM NÚMEROS COMPLEXOS DESCONTADAS DOS SEUS NIVEIS DC --------
-                        // cálculo da média da componente Y da borda DIREITA
-                        Complex[] vetorBordaDireitaComplexo = new Complex[nPontosBordaDireita + diferencaPotencia2];
-                        //Complex[] y = new Complex[nPontosBordaDireita + diferencaPotencia2];
-                        
-                        for (int i = 0; i < vetorBordaDireitaComplexo.Length; i++)
-                        {
-                            vetorBordaDireitaComplexo[i] = new Complex();
-                            //y[i] = new Complex();
-                        }
-
-                        
-                        for (int n = 0; n < nPontosBordaDireita; n++)
-                        {
-                            vetorBordaDireitaComplexo[n].Real = vetorBordaDireita[n] - media;
-                            vetorBordaDireitaComplexo[n].Imag = 0.0;
-                            //tempo = tempo + 0.001;
-                            //y[n].real = 10.0 * Math.Cos(2.0 * Math.PI * 60.0 * tempo);
-                            //y[n].imag = 0.0;
-                            //indexVetores++;
-                        }
-
-                        // criação do vetor complexo com a borda esquerda
-                        Complex[] vetorBordaEsquerdaComplexo = new Complex[nPontosBordaEsquerda + diferencaPotencia22];
-                        for (int i = 0; i < vetorBordaEsquerdaComplexo.Length; i++)
-                        {
-                            vetorBordaEsquerdaComplexo[i] = new Complex();
-                        }
-                        for (int n = 0; n < nPontosBordaEsquerda; n++)
-                        {
-                            vetorBordaEsquerdaComplexo[n].Real = vetorBordaEsquerda[n] - media2;
-                            vetorBordaEsquerdaComplexo[n].Imag = 0.0;
-                            //indexVetores2++;
-                        }
-
-                        // ---- PREENCHIMENTO DOS VETORES COMPLEXOS DAS BORDAS COM ZERO PARA GARANTIR TAMANHO MÚLTIPLO DE POTÊNCIA DE 2
-                        // completa com zeros até o núm. de pontos do vetor ser uma pot. de 2 para borda direita
-                        while (indexVetores < (nPontosBordaDireita + diferencaPotencia2))
-                        {
-                            vetorBordaDireitaComplexo[indexVetores].Real = 0.0;
-                            vetorBordaDireitaComplexo[indexVetores].Imag = 0.0;
-                            //tempo = tempo + 0.001;
-                            //y[indexVetores].real = 10.0 * Math.Cos(2.0 * Math.PI * 60.0 * tempo) + 5.0* Math.Cos(2.0*Math.PI*150.0*tempo);
-                            //y[indexVetores].imag = 0.0;
-                            indexVetores++;
-                            
-                        } // fim "while( diferencaPontecia2 > 0 )"
-                          // completa com zeros até o núm. de pontos do vetor ser uma pot. de 2 para borda esquerda
-                        while (indexVetores2 < (nPontosBordaEsquerda + diferencaPotencia22))
-                        {
-                            vetorBordaEsquerdaComplexo[indexVetores2].Real = 0.0;
-                            vetorBordaEsquerdaComplexo[indexVetores2].Imag = 0.0;
-                            indexVetores2++;
-                        }
-
-                        // ---------------- EXECUTA O ALGORITMO DA FFT PARA AS BORDAS -----------------	
-                        // execução do algoritmo para fft da borda direita
-                        Complex[] fftVetorBordaDireita = new Complex[nPontosBordaDireita + diferencaPotencia2];
-                        //Complex[] fftVetorTeste = new Complex[nPontosBordaDireita + diferencaPotencia2];
-                        for (int i = 0; i < fftVetorBordaDireita.Length; i++)
-                        {
-                            fftVetorBordaDireita[i] = new Complex();
-                        //    fftVetorTeste[i] = new Complex();
-                        }
-                        fftVetorBordaDireita = FFT.calculaFFT(vetorBordaDireitaComplexo);
-                        //fftVetorTeste = FFT.calculaFFT(y);
-
-                       // execução do algoritmo para fft da borda esquerda
-                        Complex[] fftVetorBordaEsquerda = new Complex[nPontosBordaEsquerda + diferencaPotencia22];
-                        for (int i = 0; i < fftVetorBordaEsquerda.Length; i++)
-                        {
-                            fftVetorBordaEsquerda[i] = new Complex();
-                        }
-                        fftVetorBordaEsquerda = FFT.calculaFFT(vetorBordaEsquerdaComplexo);
-
-
-                        double constFFTBordaDireita = 2.0 / (nPontosBordaDireita + diferencaPotencia2);
-                        double constFFTBordaEsquerda = 2.0 / (nPontosBordaEsquerda + diferencaPotencia22);
-                        for (int i = 0; i < fftVetorBordaEsquerda.Length; i++)
-                        {
-                            fftVetorBordaEsquerda[i].Real = fftVetorBordaEsquerda[i].Real * constFFTBordaEsquerda;
-                            fftVetorBordaEsquerda[i].Imag = fftVetorBordaEsquerda[i].Imag * constFFTBordaEsquerda;
-                        }
-
-                        for (int i = 0; i < fftVetorBordaDireita.Length; i++)
-                        {
-                            fftVetorBordaDireita[i].Real = fftVetorBordaDireita[i].Real * constFFTBordaDireita;
-                            fftVetorBordaDireita[i].Imag = fftVetorBordaDireita[i].Imag * constFFTBordaDireita;
-                        }
-
-
-                        /*
-                        // ---------------------- CLASSIFICAÇÃO DAS BORDAS -> 1a versão, câmera antiga  ------------------------------
-
-                        // ------------------ CÁLCULO DAS ENERGIAS DA BORDA DIREITA EM ALTA E BAIXA FREQUÊNCIA  ---------------------------
-                        double energiaTotalBordaDireita = 0.0;
-                        int nPontosSobre2 = (int)((nPontosBordaDireita + diferencaPotencia2) / 2.0);
-                        for (int n = 0; n < nPontosSobre2; n++)
-                        {
-                            energiaTotalBordaDireita = energiaTotalBordaDireita + Math.Pow(fftVetorBordaDireita[n].real, 2.0) + Math.Pow(fftVetorBordaDireita[n].imag, 2.0);
-                        }
-                        int BW_bordaDireita = (int)Math.Floor(nPontosSobre2 / 10.0);     // [pontos] - intervalo em pontos entre a baixa e a alta frequências
-                                                                                         //printf("Energia total da borda direita = %lf \n",energiaTotalBordaDireita);
-
-                        double energiaBaixaFreqDireita = 0.0;
-                        for (int n = 0; n < BW_bordaDireita; n++)
-                        {
-                            energiaBaixaFreqDireita = energiaBaixaFreqDireita + Math.Pow(fftVetorBordaDireita[n].real, 2.0) + Math.Pow(fftVetorBordaDireita[n].imag, 2.0);
-                        }
-                        //printf("Energia baixa frequência da borda direita = %lf \n",energiaBaixaFreqDireita);
-
-                        double energiaAltaFreqDireita = 0.0;
-                        for (int n = BW_bordaDireita; n < nPontosSobre2; n++)
-                        {
-                            energiaAltaFreqDireita = energiaAltaFreqDireita + Math.Pow(fftVetorBordaDireita[n].real, 2.0) + Math.Pow(fftVetorBordaDireita[n].imag, 2.0);
-                        }
-                        //printf("Energia alta frequência da borda direita = %lf \n",energiaAltaFreqDireita);
-                        double energiaBaixaFreqDireitaPu = energiaBaixaFreqDireita / energiaTotalBordaDireita;
-                        double energiaAltaFreqDireitaPu = energiaAltaFreqDireita / energiaTotalBordaDireita;
-                        double amplitudeMaximaBordaDireita = 0;
-                        double freqAmpMaximaBordaDireita = 0;
-                        double amplitude;
-                        for (int n = 0; n < nPontosSobre2; n++)
-                        {
-                            amplitude = Math.Sqrt(Math.Pow(fftVetorBordaDireita[n].real, 2.0) + Math.Pow(fftVetorBordaDireita[n].imag, 2.0));
-                            if (amplitude > amplitudeMaximaBordaDireita) // 
-                            {
-                                amplitudeMaximaBordaDireita = amplitude;
-                                freqAmpMaximaBordaDireita = n;
-                            }
-                        }
-
-                        // ------------------ CÁLCULO DAS ENERGIAS DA BORDA ESQUERDA EM ALTA E BAIXA FREQUÊNCIA  ---------------------------
-                        double energiaTotalBordaEsquerda = 0.0;
-                        int nPontosSobre22 = (int)((nPontosBordaEsquerda + diferencaPotencia22) / 2.0);
-                        for (int n = 0; n < nPontosSobre22; n++)
-                        {
-                            energiaTotalBordaEsquerda = energiaTotalBordaEsquerda + Math.Pow(fftVetorBordaEsquerda[n].real, 2.0) + Math.Pow(fftVetorBordaEsquerda[n].imag, 2.0);
-                        }
-                        int BW_bordaEsquerda = (int)Math.Floor(nPontosSobre2 / 10.0);
-                        //BW = 6;     // [pontos] - intervalo em pontos entre a baixa e a alta frequências
-                        //printf("Energia total da borda esquerda = %lf \n",energiaTotalBordaEsquerda);
-
-                        double energiaBaixaFreqEsquerda = 0.0;
-                        for (int n = 0; n < BW_bordaEsquerda; n++)
-                        {
-                            energiaBaixaFreqEsquerda = energiaBaixaFreqEsquerda + Math.Pow(fftVetorBordaEsquerda[n].real, 2.0) + Math.Pow(fftVetorBordaEsquerda[n].imag, 2.0);
-                        }
-                        //printf("Energia baixa frequência da borda esquerda = %lf \n",energiaBaixaFreqEsquerda);
-                        double energiaAltaFreqEsquerda = 0.0;
-                        for (int n = BW_bordaEsquerda; n < nPontosSobre22; n++)
-                        {
-                            energiaAltaFreqEsquerda = energiaAltaFreqEsquerda + Math.Pow(fftVetorBordaEsquerda[n].real, 2.0) + Math.Pow(fftVetorBordaEsquerda[n].imag, 2.0);
-                        }
-                        //printf("Energia alta frequência da borda esquerda = %lf \n",energiaAltaFreqEsquerda);
-
-                        double energiaBaixaFreqEsquerdaPu = energiaBaixaFreqEsquerda / energiaTotalBordaEsquerda;
-                        double energiaAltaFreqEsquerdaPu = energiaAltaFreqEsquerda / energiaTotalBordaEsquerda;
-                        double amplitudeMaximaBordaEsquerda = 0;
-                        double freqAmpMaximaBordaEsquerda = 0;
-                        //double amplitude;
-                        for (int n = 0; n < nPontosSobre22; n++)
-                        {
-                            amplitude = Math.Sqrt(Math.Pow(fftVetorBordaEsquerda[n].real, 2.0) + Math.Pow(fftVetorBordaEsquerda[n].imag, 2.0));
-                            if (amplitude > amplitudeMaximaBordaEsquerda) // 
-                            {
-                                amplitudeMaximaBordaEsquerda = amplitude;
-                                freqAmpMaximaBordaEsquerda = n;
-                            }
-                        }
-
-
-                        // ---------------------- CÁLCULO DA ENERGIA TOTAL DAS DUAS BORDAS DA BOBINA ------------------------------
-                        double energiaTotalBaixaFreqPu = 0.5 * (energiaBaixaFreqEsquerdaPu + energiaBaixaFreqDireitaPu);
-                        double energiaTotalAltaFreqPu = 0.5 * (energiaAltaFreqEsquerdaPu + energiaAltaFreqDireitaPu);
-
-                        
-                        double[] nota = new double[101];
-                        double[] ybf = new double[101];
-                        double[] deltaEnergiabf = new double[101];
-                        double[] yaf = new double[101];
-                        double[] deltaEnergiaaf = new double[101];
-                        double deltaEnergiabfMin = 1.0;
-                        double deltaEnergiaafMin = 1.0;
-                        double notaBordabf = 10.0;
-                        double notaBordaaf = 10.0;
-                        double notaBordaFinal;
-                        double[] coefsbf = new double[4];
-                        coefsbf[0] = 0.0137;
-                        coefsbf[1] = -0.2000;
-                        coefsbf[2] = 0.9857;
-                        coefsbf[3] = -1.0729;
-                        double[] coefsbfInicio = new double[2];
-                        coefsbfInicio[0] = 0.1514;
-                        coefsbfInicio[1] = 0.0;
-                        double[] coefsbfFinal = new double[2];
-                        coefsbfFinal[0] = 0.0905;
-                        coefsbfFinal[1] = 0.0953;
-                        double[] coefsaf = new double[4];
-                        coefsaf[0] = -0.0136;
-                        coefsaf[1] = 0.1983;
-                        coefsaf[2] = -0.9784;
-                        coefsaf[3] = 2.0632;
-                        double[] coefsafInicio = new double[2];
-                        coefsafInicio[0] = -0.1514;
-                        coefsafInicio[1] = 1.0;
-                        double[] coefsafFinal = new double[2];
-                        coefsafFinal[0] = -0.0905;
-                        coefsafFinal[1] = 0.9047;
-                        for (int n = 0; n <= 100; n++)
-                        {
-                            nota[n] = n * 0.1;
-                            if (energiaTotalBaixaFreqPu < 0.45)
-                            {
-                                ybf[n] = coefsbfInicio[0] * nota[n] + coefsbfInicio[1];
-                                yaf[n] = coefsafInicio[0] * nota[n] + coefsafInicio[1];
-
-                            }
-                            else if (energiaTotalBaixaFreqPu >= 0.45 && energiaTotalBaixaFreqPu <= 0.73)
-                            {
-                                ybf[n] = coefsbf[0] * Math.Pow(nota[n], 3) + coefsbf[1] * Math.Pow(nota[n], 2) + coefsbf[2] * nota[n] + coefsbf[3];
-                                yaf[n] = coefsaf[0] * Math.Pow(nota[n], 3) + coefsaf[1] * Math.Pow(nota[n], 2) + coefsaf[2] * nota[n] + coefsaf[3];
-                            }
-                            else
-                            {
-                                ybf[n] = coefsbfFinal[0] * nota[n] + coefsbfFinal[1];
-                                yaf[n] = coefsafFinal[0] * nota[n] + coefsafFinal[1];
-                            }
-
-                            deltaEnergiabf[n] = Math.Abs(ybf[n] - energiaTotalBaixaFreqPu);
-                            deltaEnergiaaf[n] = Math.Abs(yaf[n] - energiaTotalAltaFreqPu);
-
-                            if (deltaEnergiabf[n] < deltaEnergiabfMin)
-                            {
-                                deltaEnergiabfMin = deltaEnergiabf[n];
-                                notaBordabf = n / 10.0;
-                            }
-
-                            if (deltaEnergiaaf[n] < deltaEnergiaafMin)
-                            {
-                                deltaEnergiaafMin = deltaEnergiaaf[n];
-                                notaBordaaf = n / 10.0;
-                            }
-                        }
-
-                        notaBordaFinal = 0.5 * (notaBordabf + notaBordaaf);
-
-                        if (notaBordaFinal > 8.0)
-                        {
-                            double energiaCompMaxBordaDir = amplitudeMaximaBordaDireita * amplitudeMaximaBordaDireita;
-                            double energiaCompMaxBordaEsq = amplitudeMaximaBordaEsquerda * amplitudeMaximaBordaEsquerda;
-                            //double energiaBordaDirMenosCompMax = energiaTotalBordaDireita - energiaCompMaxBordaDir;
-                            //double energiaBordaEsqMenosCompMax = energiaTotalBordaEsquerda - energiaCompMaxBordaEsq;
-
-                            if ((energiaCompMaxBordaDir / energiaTotalBordaDireita) >= 0.5 || (energiaCompMaxBordaEsq / energiaTotalBordaEsquerda) >= 0.5)
-                            {
-                                notaBordaFinal = 4.0;
-                            }
-                        }
-
-                        ---------------- FIM DA 1A VERSÃO DO CLASSIFICADOR BASEADO NA CÂMERA ANTIGA -----------------------
-                        */
-
-
-                        // --------------------------------------------------------------------------------------------------
-                        // --------------- INÍCIO DA 2A VERSÃO DO CLASSIFICADOR BASEADO NA CÂMERA NOVA ----------------------
-
-                        // ------------------ CÁLCULO DA ENERGIA DA BORDA DIREITA   ---------------------------
-                        double energiaTotalBordaDireita = 0.0;
-                        double energiaTotalBordaEsquerda = 0.0;
-                        double energiaMedia = 0.0;
-                        double notaBordaFinal;
-                        
-                        for (int n = 0; n < 40; n++)
-                        {
-                            energiaTotalBordaDireita = energiaTotalBordaDireita + Math.Pow(fftVetorBordaDireita[n].Real, 2.0) + Math.Pow(fftVetorBordaDireita[n].Imag, 2.0) ;
-                            energiaTotalBordaEsquerda = energiaTotalBordaEsquerda + Math.Pow(fftVetorBordaEsquerda[n].Real, 2.0) + Math.Pow(fftVetorBordaEsquerda[n].Imag, 2.0) ;
-                        }
-
-                        if (energiaTotalBordaDireita >= energiaTotalBordaEsquerda)
-                            energiaMedia = (2*energiaTotalBordaDireita + energiaTotalBordaEsquerda) / 3;
-                        else energiaMedia = (2*energiaTotalBordaEsquerda + energiaTotalBordaDireita) / 3;
-
-                        notaBordaFinal = -2.6406e-09*Math.Pow(energiaMedia,3.0) + 1.023e-05*Math.Pow(energiaMedia, 2.0) - 0.016104*energiaMedia + 11.086;
-                        //-4.168e-09*Math.Pow(energiaMedia,3.0) + 1.464e-05*Math.Pow(energiaMedia,2.0) - 0.01805*energiaMedia + 11.76;
-
-                        // --------------------------------------------------------------------------------------------------
-                        // ------------------ FIM DA 2A VERSÃO DO CLASSIFICADOR BASEADO NA CÂMERA NOVA ----------------------
-
-                        // ------------------- gravação do arquivo com as notas das bordas -----------------------------------
-                        double notaPelosBuracos = hv_NotaClaBur;
-                        if (notaBordaFinal < 0)
-                            notaBordaFinal = 0.0;
-                        if (notaBordaFinal > 10.0)
-                            notaBordaFinal = 10.0;
-                        if (notaPelosBuracos < 0)
-                            notaPelosBuracos = 0.0;
-                        if (notaPelosBuracos > 10.0)
-                            notaPelosBuracos = 10.0;
-                        double notaBordaFinalMedia = 0.5 * (notaBordaFinal + notaPelosBuracos);
-                        vetorNotasPeloEspectro[numeroDeNotas] = notaBordaFinal;
-                        vetorNotasPelosBuracos[numeroDeNotas] = notaPelosBuracos;
-                        vetorNotasMedias[numeroDeNotas] = notaBordaFinalMedia;
-                        data = CurrentTime.Date.ToString("dd_MM_yyyy");
-                        vetorDatas[numeroDeNotas] = data;
-                        horario = DateTime.Now.ToString("HH_mm_ss_fff tt");// DateTime.Now.TimeOfDay
-                        vetorHorarios[numeroDeNotas] = horario;
-                        numeroDeNotas = numeroDeNotas + 1;
-                        //arquivoNotas.WriteLine(data + " " + horario + " " + notaBordaFinal.ToString("N", nfi));// (FFTVetorBorda[i].real.ToString("N", nfi) + " " + FFTVetorBorda[i].imag.ToString("N", nfi));
-                        //arquivoNotas.WriteLine(data + "  " + horario + "  " + notaBordaFinal.ToString("N", nfi) + "  " + notaPelosBuracos.ToString("N", nfi) + "  " + notaBordaFinalMedia.ToString("N", nfi));// (FFTVetorBorda[i].real.ToString("N", nfi) + " " + FFTVetorBorda[i].imag.ToString("N", nfi));
-
-
-                        // -------------- gravação dos arquivos de imagem para cada frame amostrado --------------------------
-                        //hv_nomeArquivoVideoSaida = "C:\\Users\\Administrador\\Documents\\classificadorDeBobinas\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\imagemParaVideo";
-                        //HOperatorSet.TupleString(hv_ImageNum, "04d", out hv_ImageNumString);
-                        //HOperatorSet.TupleAdd(hv_nomeArquivoVideoSaida, hv_ImageNumString, out hv_nomeArquivoVideoSaida);
-                        //HOperatorSet.TupleAdd(hv_nomeArquivoVideoSaida, ".png", out hv_nomeArquivoVideoSaida);
-                        //HOperatorSet.WriteImage(ho_Image, "png fastest", 255, hv_nomeArquivoVideoSaida);
-
-
-                        // arquivoResultadoFFTTeste = File.CreateText("C:\\Users\\NOTEBOOK\\Documents\\pesquisas\\gerdau\\FORMACAODEESPIRAS\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\fftResultadoTeste");
-                        // ------------- gravação dos arquivos com os pontos das bordas e do fft ----------------------------
-                        //if (hv_ImageNum == 30)
-                        //{
-                        /*    for (int i = 0; i < fftVetorBordaDireita.Length; i++)
-                            {
-                                arquivoResultadoFFTBordaDireita.WriteLine(fftVetorBordaDireita[i].real.ToString("N", nfi) + " " + fftVetorBordaDireita[i].imag.ToString("N", nfi));
-                                //arquivoResultadoFFTTeste.WriteLine(fftVetorTeste[i].real.ToString("N", nfi) + " " + fftVetorTeste[i].imag.ToString("N", nfi));
-                            }
+                            // ------------- CRIAÇÃO DO VETOR DE NÚMEROS COMPLEXOS COM AS INFORMAÇÕES DAS LINHAS(Y) DOS PONTOS DAS BORDAS --------
+                            // criação do vetor complexo com a borda direita
+                            int nPontosBordaDireita = (int)(new HTuple(hv_Row1.TupleLength()));
+                            double[] vetorBordaDireita = new double[nPontosBordaDireita];
+                            double[] vetorEixoXBordaDireita = new double[nPontosBordaDireita];
                             for (int i = 0; i < vetorBordaDireita.Length; i++)
-                            //for (int i = 0; i < fftVetorBordaDireita.Length; i++)
                             {
-                                arquivoPontosBordaDireita.WriteLine(vetorEixoXBordaDireita[i].ToString("N", nfi) + " " + vetorBordaDireita[i].ToString("N", nfi));
-                                //arquivoPontosBordaDireita.WriteLine(y[i].real.ToString("N", nfi) + " " + y[i].imag.ToString("N", nfi));
+                                vetorBordaDireita[i] = new double();
+                                vetorEixoXBordaDireita[i] = new double();
+                            }
+                            for (int n = 0; n < nPontosBordaDireita; n++)
+                            {
+                                vetorBordaDireita[n] = hv_Row1.TupleSelect(n);
+                                vetorEixoXBordaDireita[n] = hv_Col1.TupleSelect(n);
+                                //indexVetores++;
                             }
 
-                            arquivoResultadoFFTBordaDireita.Close();
-                            arquivoPontosBordaDireita.Close();
-                            //arquivoResultadoFFTTeste.Close();
-
-                            for (int i = 0; i < fftVetorBordaEsquerda.Length; i++)
-                            {
-                                arquivoResultadoFFTBordaEsquerda.WriteLine(fftVetorBordaEsquerda[i].real.ToString("N", nfi) + " " + fftVetorBordaEsquerda[i].imag.ToString("N", nfi));
-                            }
+                            // criação do vetor complexo com a borda esquerda
+                            int nPontosBordaEsquerda = (int)(new HTuple(hv_Row.TupleLength()));
+                            double[] vetorBordaEsquerda = new double[nPontosBordaEsquerda];
+                            double[] vetorEixoXBordaEsquerda = new double[nPontosBordaEsquerda];
                             for (int i = 0; i < vetorBordaEsquerda.Length; i++)
                             {
-                                arquivoPontosBordaEsquerda.WriteLine(vetorEixoXBordaEsquerda[i].ToString("N", nfi) + " " + vetorBordaEsquerda[i].ToString("N", nfi));
+                                vetorBordaEsquerda[i] = new double();
+                                vetorEixoXBordaEsquerda[i] = new double();
                             }
-                            arquivoResultadoFFTBordaEsquerda.Close();
-                            arquivoPontosBordaEsquerda.Close();
+                            for (int n = 0; n < nPontosBordaEsquerda; n++)
+                            {
+                                vetorBordaEsquerda[n] = hv_Row.TupleSelect(n);
+                                vetorEixoXBordaEsquerda[n] = hv_Col.TupleSelect(n);
+                                //indexVetores++;
+                            }
+
+                            // ------------------CÁLCULO DA POTÊNCIA DE 2 MAIS PRÓXIMA DO NÚMERO DE PONTOS DE CADA BORDA ------------
+                            // determina a potência de 2 mais próxima do número de amostras processadas da borda DIREITA
+                            int expoente = 0;
+                            while (nPontosBordaDireita > Math.Pow(2.0, (double)expoente))
+                            {
+                                expoente++;
+                            }
+                            int diferencaPotencia2 = (int)(Math.Pow(2.0, (double)expoente)) - nPontosBordaDireita;
+                            //diferencaPotencia2 = 0;
+                            indexVetores = nPontosBordaDireita;
+
+                            // determina a potência de 2 mais próxima do número de amostras processadas da borda ESQUERDA
+                            int expoente2 = 0;
+                            while (nPontosBordaEsquerda > Math.Pow(2.0, (double)expoente2))
+                            {
+                                expoente2++;
+                            }
+                            int diferencaPotencia22 = (int)(Math.Pow(2.0, (double)expoente2)) - nPontosBordaEsquerda;
+                            //diferencaPotencia2 = 0;
+                            int indexVetores2 = nPontosBordaEsquerda;
+
+                            // ------------ CÁLCULO DAS MÉDIAS DAS COMPONENTES Y DAS BORDAS ----------------
+                            // cálculo da média da componente Y da borda DIREITA
+                            double media = 0.0;
+                            for (int n = 0; n < nPontosBordaDireita; n++)
+                            {
+                                media = media + vetorBordaDireita[n];
+                            }
+                            media = media / nPontosBordaDireita;
+                            // cálculo da média da componente Y da borda ESQUERDA
+                            double media2 = 0.0;
+                            for (int n = 0; n < nPontosBordaEsquerda; n++)
+                            {
+                                media2 = media2 + vetorBordaEsquerda[n];
+                            }
+                            media2 = media2 / nPontosBordaEsquerda;
+
+                            // ------ CRIAÇÃO DOS VETORES DAS BORDAS COM NÚMEROS COMPLEXOS DESCONTADAS DOS SEUS NIVEIS DC --------
+                            // cálculo da média da componente Y da borda DIREITA
+                            Complex[] vetorBordaDireitaComplexo = new Complex[nPontosBordaDireita + diferencaPotencia2];
+                            //Complex[] y = new Complex[nPontosBordaDireita + diferencaPotencia2];
+
+                            for (int i = 0; i < vetorBordaDireitaComplexo.Length; i++)
+                            {
+                                vetorBordaDireitaComplexo[i] = new Complex();
+                                //y[i] = new Complex();
+                            }
+
+
+                            for (int n = 0; n < nPontosBordaDireita; n++)
+                            {
+                                vetorBordaDireitaComplexo[n].Real = vetorBordaDireita[n] - media;
+                                vetorBordaDireitaComplexo[n].Imag = 0.0;
+                                //tempo = tempo + 0.001;
+                                //y[n].real = 10.0 * Math.Cos(2.0 * Math.PI * 60.0 * tempo);
+                                //y[n].imag = 0.0;
+                                //indexVetores++;
+                            }
+
+                            // criação do vetor complexo com a borda esquerda
+                            Complex[] vetorBordaEsquerdaComplexo = new Complex[nPontosBordaEsquerda + diferencaPotencia22];
+                            for (int i = 0; i < vetorBordaEsquerdaComplexo.Length; i++)
+                            {
+                                vetorBordaEsquerdaComplexo[i] = new Complex();
+                            }
+                            for (int n = 0; n < nPontosBordaEsquerda; n++)
+                            {
+                                vetorBordaEsquerdaComplexo[n].Real = vetorBordaEsquerda[n] - media2;
+                                vetorBordaEsquerdaComplexo[n].Imag = 0.0;
+                                //indexVetores2++;
+                            }
+
+                            // ---- PREENCHIMENTO DOS VETORES COMPLEXOS DAS BORDAS COM ZERO PARA GARANTIR TAMANHO MÚLTIPLO DE POTÊNCIA DE 2
+                            // completa com zeros até o núm. de pontos do vetor ser uma pot. de 2 para borda direita
+                            while (indexVetores < (nPontosBordaDireita + diferencaPotencia2))
+                            {
+                                vetorBordaDireitaComplexo[indexVetores].Real = 0.0;
+                                vetorBordaDireitaComplexo[indexVetores].Imag = 0.0;
+                                //tempo = tempo + 0.001;
+                                //y[indexVetores].real = 10.0 * Math.Cos(2.0 * Math.PI * 60.0 * tempo) + 5.0* Math.Cos(2.0*Math.PI*150.0*tempo);
+                                //y[indexVetores].imag = 0.0;
+                                indexVetores++;
+
+                            } // fim "while( diferencaPontecia2 > 0 )"
+                              // completa com zeros até o núm. de pontos do vetor ser uma pot. de 2 para borda esquerda
+                            while (indexVetores2 < (nPontosBordaEsquerda + diferencaPotencia22))
+                            {
+                                vetorBordaEsquerdaComplexo[indexVetores2].Real = 0.0;
+                                vetorBordaEsquerdaComplexo[indexVetores2].Imag = 0.0;
+                                indexVetores2++;
+                            }
+
+                            // ---------------- EXECUTA O ALGORITMO DA FFT PARA AS BORDAS -----------------	
+                            // execução do algoritmo para fft da borda direita
+                            Complex[] fftVetorBordaDireita = new Complex[nPontosBordaDireita + diferencaPotencia2];
+                            //Complex[] fftVetorTeste = new Complex[nPontosBordaDireita + diferencaPotencia2];
+                            for (int i = 0; i < fftVetorBordaDireita.Length; i++)
+                            {
+                                fftVetorBordaDireita[i] = new Complex();
+                                //    fftVetorTeste[i] = new Complex();
+                            }
+                            fftVetorBordaDireita = FFT.calculaFFT(vetorBordaDireitaComplexo);
+                            //fftVetorTeste = FFT.calculaFFT(y);
+
+                            // execução do algoritmo para fft da borda esquerda
+                            Complex[] fftVetorBordaEsquerda = new Complex[nPontosBordaEsquerda + diferencaPotencia22];
+                            for (int i = 0; i < fftVetorBordaEsquerda.Length; i++)
+                            {
+                                fftVetorBordaEsquerda[i] = new Complex();
+                            }
+                            fftVetorBordaEsquerda = FFT.calculaFFT(vetorBordaEsquerdaComplexo);
+
+
+                            double constFFTBordaDireita = 2.0 / (nPontosBordaDireita + diferencaPotencia2);
+                            double constFFTBordaEsquerda = 2.0 / (nPontosBordaEsquerda + diferencaPotencia22);
+                            for (int i = 0; i < fftVetorBordaEsquerda.Length; i++)
+                            {
+                                fftVetorBordaEsquerda[i].Real = fftVetorBordaEsquerda[i].Real * constFFTBordaEsquerda;
+                                fftVetorBordaEsquerda[i].Imag = fftVetorBordaEsquerda[i].Imag * constFFTBordaEsquerda;
+                            }
+
+                            for (int i = 0; i < fftVetorBordaDireita.Length; i++)
+                            {
+                                fftVetorBordaDireita[i].Real = fftVetorBordaDireita[i].Real * constFFTBordaDireita;
+                                fftVetorBordaDireita[i].Imag = fftVetorBordaDireita[i].Imag * constFFTBordaDireita;
+                            }
+
+
+                            /*
+                            // ---------------------- CLASSIFICAÇÃO DAS BORDAS -> 1a versão, câmera antiga  ------------------------------
+
+                            // ------------------ CÁLCULO DAS ENERGIAS DA BORDA DIREITA EM ALTA E BAIXA FREQUÊNCIA  ---------------------------
+                            double energiaTotalBordaDireita = 0.0;
+                            int nPontosSobre2 = (int)((nPontosBordaDireita + diferencaPotencia2) / 2.0);
+                            for (int n = 0; n < nPontosSobre2; n++)
+                            {
+                                energiaTotalBordaDireita = energiaTotalBordaDireita + Math.Pow(fftVetorBordaDireita[n].real, 2.0) + Math.Pow(fftVetorBordaDireita[n].imag, 2.0);
+                            }
+                            int BW_bordaDireita = (int)Math.Floor(nPontosSobre2 / 10.0);     // [pontos] - intervalo em pontos entre a baixa e a alta frequências
+                                                                                             //printf("Energia total da borda direita = %lf \n",energiaTotalBordaDireita);
+
+                            double energiaBaixaFreqDireita = 0.0;
+                            for (int n = 0; n < BW_bordaDireita; n++)
+                            {
+                                energiaBaixaFreqDireita = energiaBaixaFreqDireita + Math.Pow(fftVetorBordaDireita[n].real, 2.0) + Math.Pow(fftVetorBordaDireita[n].imag, 2.0);
+                            }
+                            //printf("Energia baixa frequência da borda direita = %lf \n",energiaBaixaFreqDireita);
+
+                            double energiaAltaFreqDireita = 0.0;
+                            for (int n = BW_bordaDireita; n < nPontosSobre2; n++)
+                            {
+                                energiaAltaFreqDireita = energiaAltaFreqDireita + Math.Pow(fftVetorBordaDireita[n].real, 2.0) + Math.Pow(fftVetorBordaDireita[n].imag, 2.0);
+                            }
+                            //printf("Energia alta frequência da borda direita = %lf \n",energiaAltaFreqDireita);
+                            double energiaBaixaFreqDireitaPu = energiaBaixaFreqDireita / energiaTotalBordaDireita;
+                            double energiaAltaFreqDireitaPu = energiaAltaFreqDireita / energiaTotalBordaDireita;
+                            double amplitudeMaximaBordaDireita = 0;
+                            double freqAmpMaximaBordaDireita = 0;
+                            double amplitude;
+                            for (int n = 0; n < nPontosSobre2; n++)
+                            {
+                                amplitude = Math.Sqrt(Math.Pow(fftVetorBordaDireita[n].real, 2.0) + Math.Pow(fftVetorBordaDireita[n].imag, 2.0));
+                                if (amplitude > amplitudeMaximaBordaDireita) // 
+                                {
+                                    amplitudeMaximaBordaDireita = amplitude;
+                                    freqAmpMaximaBordaDireita = n;
+                                }
+                            }
+
+                            // ------------------ CÁLCULO DAS ENERGIAS DA BORDA ESQUERDA EM ALTA E BAIXA FREQUÊNCIA  ---------------------------
+                            double energiaTotalBordaEsquerda = 0.0;
+                            int nPontosSobre22 = (int)((nPontosBordaEsquerda + diferencaPotencia22) / 2.0);
+                            for (int n = 0; n < nPontosSobre22; n++)
+                            {
+                                energiaTotalBordaEsquerda = energiaTotalBordaEsquerda + Math.Pow(fftVetorBordaEsquerda[n].real, 2.0) + Math.Pow(fftVetorBordaEsquerda[n].imag, 2.0);
+                            }
+                            int BW_bordaEsquerda = (int)Math.Floor(nPontosSobre2 / 10.0);
+                            //BW = 6;     // [pontos] - intervalo em pontos entre a baixa e a alta frequências
+                            //printf("Energia total da borda esquerda = %lf \n",energiaTotalBordaEsquerda);
+
+                            double energiaBaixaFreqEsquerda = 0.0;
+                            for (int n = 0; n < BW_bordaEsquerda; n++)
+                            {
+                                energiaBaixaFreqEsquerda = energiaBaixaFreqEsquerda + Math.Pow(fftVetorBordaEsquerda[n].real, 2.0) + Math.Pow(fftVetorBordaEsquerda[n].imag, 2.0);
+                            }
+                            //printf("Energia baixa frequência da borda esquerda = %lf \n",energiaBaixaFreqEsquerda);
+                            double energiaAltaFreqEsquerda = 0.0;
+                            for (int n = BW_bordaEsquerda; n < nPontosSobre22; n++)
+                            {
+                                energiaAltaFreqEsquerda = energiaAltaFreqEsquerda + Math.Pow(fftVetorBordaEsquerda[n].real, 2.0) + Math.Pow(fftVetorBordaEsquerda[n].imag, 2.0);
+                            }
+                            //printf("Energia alta frequência da borda esquerda = %lf \n",energiaAltaFreqEsquerda);
+
+                            double energiaBaixaFreqEsquerdaPu = energiaBaixaFreqEsquerda / energiaTotalBordaEsquerda;
+                            double energiaAltaFreqEsquerdaPu = energiaAltaFreqEsquerda / energiaTotalBordaEsquerda;
+                            double amplitudeMaximaBordaEsquerda = 0;
+                            double freqAmpMaximaBordaEsquerda = 0;
+                            //double amplitude;
+                            for (int n = 0; n < nPontosSobre22; n++)
+                            {
+                                amplitude = Math.Sqrt(Math.Pow(fftVetorBordaEsquerda[n].real, 2.0) + Math.Pow(fftVetorBordaEsquerda[n].imag, 2.0));
+                                if (amplitude > amplitudeMaximaBordaEsquerda) // 
+                                {
+                                    amplitudeMaximaBordaEsquerda = amplitude;
+                                    freqAmpMaximaBordaEsquerda = n;
+                                }
+                            }
+
+
+                            // ---------------------- CÁLCULO DA ENERGIA TOTAL DAS DUAS BORDAS DA BOBINA ------------------------------
+                            double energiaTotalBaixaFreqPu = 0.5 * (energiaBaixaFreqEsquerdaPu + energiaBaixaFreqDireitaPu);
+                            double energiaTotalAltaFreqPu = 0.5 * (energiaAltaFreqEsquerdaPu + energiaAltaFreqDireitaPu);
+
+
+                            double[] nota = new double[101];
+                            double[] ybf = new double[101];
+                            double[] deltaEnergiabf = new double[101];
+                            double[] yaf = new double[101];
+                            double[] deltaEnergiaaf = new double[101];
+                            double deltaEnergiabfMin = 1.0;
+                            double deltaEnergiaafMin = 1.0;
+                            double notaBordabf = 10.0;
+                            double notaBordaaf = 10.0;
+                            double notaBordaFinal;
+                            double[] coefsbf = new double[4];
+                            coefsbf[0] = 0.0137;
+                            coefsbf[1] = -0.2000;
+                            coefsbf[2] = 0.9857;
+                            coefsbf[3] = -1.0729;
+                            double[] coefsbfInicio = new double[2];
+                            coefsbfInicio[0] = 0.1514;
+                            coefsbfInicio[1] = 0.0;
+                            double[] coefsbfFinal = new double[2];
+                            coefsbfFinal[0] = 0.0905;
+                            coefsbfFinal[1] = 0.0953;
+                            double[] coefsaf = new double[4];
+                            coefsaf[0] = -0.0136;
+                            coefsaf[1] = 0.1983;
+                            coefsaf[2] = -0.9784;
+                            coefsaf[3] = 2.0632;
+                            double[] coefsafInicio = new double[2];
+                            coefsafInicio[0] = -0.1514;
+                            coefsafInicio[1] = 1.0;
+                            double[] coefsafFinal = new double[2];
+                            coefsafFinal[0] = -0.0905;
+                            coefsafFinal[1] = 0.9047;
+                            for (int n = 0; n <= 100; n++)
+                            {
+                                nota[n] = n * 0.1;
+                                if (energiaTotalBaixaFreqPu < 0.45)
+                                {
+                                    ybf[n] = coefsbfInicio[0] * nota[n] + coefsbfInicio[1];
+                                    yaf[n] = coefsafInicio[0] * nota[n] + coefsafInicio[1];
+
+                                }
+                                else if (energiaTotalBaixaFreqPu >= 0.45 && energiaTotalBaixaFreqPu <= 0.73)
+                                {
+                                    ybf[n] = coefsbf[0] * Math.Pow(nota[n], 3) + coefsbf[1] * Math.Pow(nota[n], 2) + coefsbf[2] * nota[n] + coefsbf[3];
+                                    yaf[n] = coefsaf[0] * Math.Pow(nota[n], 3) + coefsaf[1] * Math.Pow(nota[n], 2) + coefsaf[2] * nota[n] + coefsaf[3];
+                                }
+                                else
+                                {
+                                    ybf[n] = coefsbfFinal[0] * nota[n] + coefsbfFinal[1];
+                                    yaf[n] = coefsafFinal[0] * nota[n] + coefsafFinal[1];
+                                }
+
+                                deltaEnergiabf[n] = Math.Abs(ybf[n] - energiaTotalBaixaFreqPu);
+                                deltaEnergiaaf[n] = Math.Abs(yaf[n] - energiaTotalAltaFreqPu);
+
+                                if (deltaEnergiabf[n] < deltaEnergiabfMin)
+                                {
+                                    deltaEnergiabfMin = deltaEnergiabf[n];
+                                    notaBordabf = n / 10.0;
+                                }
+
+                                if (deltaEnergiaaf[n] < deltaEnergiaafMin)
+                                {
+                                    deltaEnergiaafMin = deltaEnergiaaf[n];
+                                    notaBordaaf = n / 10.0;
+                                }
+                            }
+
+                            notaBordaFinal = 0.5 * (notaBordabf + notaBordaaf);
+
+                            if (notaBordaFinal > 8.0)
+                            {
+                                double energiaCompMaxBordaDir = amplitudeMaximaBordaDireita * amplitudeMaximaBordaDireita;
+                                double energiaCompMaxBordaEsq = amplitudeMaximaBordaEsquerda * amplitudeMaximaBordaEsquerda;
+                                //double energiaBordaDirMenosCompMax = energiaTotalBordaDireita - energiaCompMaxBordaDir;
+                                //double energiaBordaEsqMenosCompMax = energiaTotalBordaEsquerda - energiaCompMaxBordaEsq;
+
+                                if ((energiaCompMaxBordaDir / energiaTotalBordaDireita) >= 0.5 || (energiaCompMaxBordaEsq / energiaTotalBordaEsquerda) >= 0.5)
+                                {
+                                    notaBordaFinal = 4.0;
+                                }
+                            }
+
+                            ---------------- FIM DA 1A VERSÃO DO CLASSIFICADOR BASEADO NA CÂMERA ANTIGA -----------------------
                             */
 
-                        //}
+
+                            // --------------------------------------------------------------------------------------------------
+                            // --------------- INÍCIO DA 2A VERSÃO DO CLASSIFICADOR BASEADO NA CÂMERA NOVA ----------------------
+
+                            // ------------------ CÁLCULO DA ENERGIA DA BORDA DIREITA   ---------------------------
+                            double energiaTotalBordaDireita = 0.0;
+                            double energiaTotalBordaEsquerda = 0.0;
+                            double energiaMedia = 0.0;
+                            double notaBordaFinal;
+
+                            for (int n = 0; n < 40; n++)
+                            {
+                                energiaTotalBordaDireita = energiaTotalBordaDireita + Math.Pow(fftVetorBordaDireita[n].Real, 2.0) + Math.Pow(fftVetorBordaDireita[n].Imag, 2.0);
+                                energiaTotalBordaEsquerda = energiaTotalBordaEsquerda + Math.Pow(fftVetorBordaEsquerda[n].Real, 2.0) + Math.Pow(fftVetorBordaEsquerda[n].Imag, 2.0);
+                            }
+
+                            if (energiaTotalBordaDireita >= energiaTotalBordaEsquerda)
+                                energiaMedia = (2 * energiaTotalBordaDireita + energiaTotalBordaEsquerda) / 3;
+                            else energiaMedia = (2 * energiaTotalBordaEsquerda + energiaTotalBordaDireita) / 3;
+
+                            notaBordaFinal = -2.6406e-09 * Math.Pow(energiaMedia, 3.0) + 1.023e-05 * Math.Pow(energiaMedia, 2.0) - 0.016104 * energiaMedia + 11.086;
+                            //-4.168e-09*Math.Pow(energiaMedia,3.0) + 1.464e-05*Math.Pow(energiaMedia,2.0) - 0.01805*energiaMedia + 11.76;
+
+                            // --------------------------------------------------------------------------------------------------
+                            // ------------------ FIM DA 2A VERSÃO DO CLASSIFICADOR BASEADO NA CÂMERA NOVA ----------------------
+
+                            // ------------------- gravação do arquivo com as notas das bordas -----------------------------------
+                            double notaPelosBuracos = hv_NotaClaBur;
+                            if (notaBordaFinal < 0)
+                                notaBordaFinal = 0.0;
+                            if (notaBordaFinal > 10.0)
+                                notaBordaFinal = 10.0;
+                            if (notaPelosBuracos < 0)
+                                notaPelosBuracos = 0.0;
+                            if (notaPelosBuracos > 10.0)
+                                notaPelosBuracos = 10.0;
+                            double notaBordaFinalMedia = 0.5 * (notaBordaFinal + notaPelosBuracos);
+                            vetorNotasPeloEspectro[numeroDeNotas] = notaBordaFinal;
+                            vetorNotasPelosBuracos[numeroDeNotas] = notaPelosBuracos;
+                            vetorNotasMedias[numeroDeNotas] = notaBordaFinalMedia;
+                            data = CurrentTime.Date.ToString("dd_MM_yyyy");
+                            vetorDatas[numeroDeNotas] = data;
+                            horario = DateTime.Now.ToString("HH_mm_ss_fff tt");// DateTime.Now.TimeOfDay
+                            vetorHorarios[numeroDeNotas] = horario;
+                            numeroDeNotas = numeroDeNotas + 1;
+                            //arquivoNotas.WriteLine(data + " " + horario + " " + notaBordaFinal.ToString("N", nfi));// (FFTVetorBorda[i].real.ToString("N", nfi) + " " + FFTVetorBorda[i].imag.ToString("N", nfi));
+                            //arquivoNotas.WriteLine(data + "  " + horario + "  " + notaBordaFinal.ToString("N", nfi) + "  " + notaPelosBuracos.ToString("N", nfi) + "  " + notaBordaFinalMedia.ToString("N", nfi));// (FFTVetorBorda[i].real.ToString("N", nfi) + " " + FFTVetorBorda[i].imag.ToString("N", nfi));
+
+
+                            // -------------- gravação dos arquivos de imagem para cada frame amostrado --------------------------
+                            //hv_nomeArquivoVideoSaida = "C:\\Users\\Administrador\\Documents\\classificadorDeBobinas\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\imagemParaVideo";
+                            //HOperatorSet.TupleString(hv_ImageNum, "04d", out hv_ImageNumString);
+                            //HOperatorSet.TupleAdd(hv_nomeArquivoVideoSaida, hv_ImageNumString, out hv_nomeArquivoVideoSaida);
+                            //HOperatorSet.TupleAdd(hv_nomeArquivoVideoSaida, ".png", out hv_nomeArquivoVideoSaida);
+                            //HOperatorSet.WriteImage(ho_Image, "png fastest", 255, hv_nomeArquivoVideoSaida);
+
+
+                            // arquivoResultadoFFTTeste = File.CreateText("C:\\Users\\NOTEBOOK\\Documents\\pesquisas\\gerdau\\FORMACAODEESPIRAS\\FormacaoVideos\\CodigoEmC#\\HDevelopTemplateWPF\\HDevelopTemplateWPF\\vs2008\\fftResultadoTeste");
+                            // ------------- gravação dos arquivos com os pontos das bordas e do fft ----------------------------
+                            //if (hv_ImageNum == 30)
+                            //{
+                            /*    for (int i = 0; i < fftVetorBordaDireita.Length; i++)
+                                {
+                                    arquivoResultadoFFTBordaDireita.WriteLine(fftVetorBordaDireita[i].real.ToString("N", nfi) + " " + fftVetorBordaDireita[i].imag.ToString("N", nfi));
+                                    //arquivoResultadoFFTTeste.WriteLine(fftVetorTeste[i].real.ToString("N", nfi) + " " + fftVetorTeste[i].imag.ToString("N", nfi));
+                                }
+                                for (int i = 0; i < vetorBordaDireita.Length; i++)
+                                //for (int i = 0; i < fftVetorBordaDireita.Length; i++)
+                                {
+                                    arquivoPontosBordaDireita.WriteLine(vetorEixoXBordaDireita[i].ToString("N", nfi) + " " + vetorBordaDireita[i].ToString("N", nfi));
+                                    //arquivoPontosBordaDireita.WriteLine(y[i].real.ToString("N", nfi) + " " + y[i].imag.ToString("N", nfi));
+                                }
+
+                                arquivoResultadoFFTBordaDireita.Close();
+                                arquivoPontosBordaDireita.Close();
+                                //arquivoResultadoFFTTeste.Close();
+
+                                for (int i = 0; i < fftVetorBordaEsquerda.Length; i++)
+                                {
+                                    arquivoResultadoFFTBordaEsquerda.WriteLine(fftVetorBordaEsquerda[i].real.ToString("N", nfi) + " " + fftVetorBordaEsquerda[i].imag.ToString("N", nfi));
+                                }
+                                for (int i = 0; i < vetorBordaEsquerda.Length; i++)
+                                {
+                                    arquivoPontosBordaEsquerda.WriteLine(vetorEixoXBordaEsquerda[i].ToString("N", nfi) + " " + vetorBordaEsquerda[i].ToString("N", nfi));
+                                }
+                                arquivoResultadoFFTBordaEsquerda.Close();
+                                arquivoPontosBordaEsquerda.Close();
+                                */
+
+                            //}
+                        }
                     }
+                    //notaBordabf = notaBordabf;
                 }
-                //notaBordabf = notaBordabf;
+
+                /*if (hv_ImageNum >= 201)
+                { 
+                    arquivoNotas.Close();
+                    double notaBordaFinal = 0.0;
+                }*/
+
+                if (token.IsCancellationRequested)
+                {
+                    HOperatorSet.CloseFramegrabber(hv_AcqHandle);
+                    ho_Image.Dispose();
+                    arquivoNotas.Close();
+                    break;
+                }
             }
-
-            /*if (hv_ImageNum >= 201)
-            { 
-                arquivoNotas.Close();
-                double notaBordaFinal = 0.0;
-            }*/
-
-            if (token.IsCancellationRequested)
+            catch(HalconException e)
             {
-                HOperatorSet.CloseFramegrabber(hv_AcqHandle);
-                ho_Image.Dispose();
-                arquivoNotas.Close();
-                break;
+                Console.WriteLine(e.Message);
             }
         }
 
